@@ -298,7 +298,7 @@ namespace TwitchDownloaderWPF
         private static long ValidateUrl(string text)
         {
             var vodIdMatch = IdParse.MatchVideoId(text);
-            if (vodIdMatch is {Success: true} && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
+            if (vodIdMatch is { Success: true } && long.TryParse(vodIdMatch.ValueSpan, out var vodId))
             {
                 return vodId;
             }
@@ -449,6 +449,12 @@ namespace TwitchDownloaderWPF
             SetEnabled(false);
             btnGetInfo.IsEnabled = false;
 
+            // allow download selected chats same time
+            if (chkWithChats.IsChecked.GetValueOrDefault())
+            {
+                DownlaodChatSync();
+            }
+
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
@@ -591,6 +597,102 @@ namespace TwitchDownloaderWPF
                 Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
                 Settings.Default.Save();
             }
+        }
+
+        //////////////////////////////// download chats at the same time ///////////////////////////
+        private async void DownlaodChatSync()
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text, streamerId,
+                   checkStart.IsChecked == true ? new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value) : TimeSpan.Zero,
+                   checkEnd.IsChecked == true ? new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value) : vodLength,
+                   vodLength, viewCount, game)
+            };
+
+            saveFileDialog.Filter = "JSON Files | *.json";
+            saveFileDialog.FileName += ".json";
+
+            if (saveFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                ChatDownloadOptions downloadOptions = GetChatOptions(saveFileDialog.FileName);
+
+                var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+                var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
+
+                btnGetInfo.IsEnabled = false;
+                SetEnabled(false);
+
+                SetImage("Images/ppOverheat.gif", true);
+                statusMessage.Text = Translations.Strings.StatusDownloading;
+                _cancellationTokenSource = new CancellationTokenSource();
+                UpdateActionButtons(true);
+
+                try
+                {
+                    await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                    downloadProgress.SetStatus(Translations.Strings.StatusDone);
+                    SetImage("Images/ppHop.gif", true);
+                }
+                catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
+                {
+                    downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
+                    SetImage("Images/ppHop.gif", true);
+                }
+                catch (Exception ex)
+                {
+                    downloadProgress.SetStatus(Translations.Strings.StatusError);
+                    SetImage("Images/peepoSad.png", false);
+                    AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                    if (Settings.Default.VerboseErrors)
+                    {
+                        MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                _cancellationTokenSource.Dispose();
+
+                GC.Collect();
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+            }
+        }
+
+        public ChatDownloadOptions GetChatOptions(string filename)
+        {
+            ChatDownloadOptions options = new ChatDownloadOptions();
+
+            options.DownloadFormat = ChatFormat.Json;
+
+            // TODO: Support non-json chat compression
+            options.Compression = ChatCompression.None;
+
+            if (checkStart.IsChecked == true)
+            {
+                options.TrimBeginning = true;
+                TimeSpan start = new TimeSpan((int)numStartHour.Value, (int)numStartMinute.Value, (int)numStartSecond.Value);
+                options.TrimBeginningTime = (int)start.TotalSeconds;
+            }
+
+            if (checkEnd.IsChecked == true)
+            {
+                options.TrimEnding = true;
+                TimeSpan end = new TimeSpan((int)numEndHour.Value, (int)numEndMinute.Value, (int)numEndSecond.Value);
+                options.TrimEndingTime = (int)end.TotalSeconds;
+            }
+
+            options.TimeFormat = TimestampFormat.Utc;
+
+            options.Id = currentVideoId.ToString();
+            options.Filename = filename;
+            options.DownloadThreads = 8;
+            return options;
         }
     }
 }
