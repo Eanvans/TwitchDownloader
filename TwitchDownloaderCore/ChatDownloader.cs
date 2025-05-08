@@ -302,6 +302,10 @@ namespace TwitchDownloaderCore
 
             chatRoot.comments = await DownloadComments(downloadType, chatRoot.video, connectionCount, cancellationToken);
 
+            // do some data analyze work
+            List<DateTime> timeSlot = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
+
+
             // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
             if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)
             {
