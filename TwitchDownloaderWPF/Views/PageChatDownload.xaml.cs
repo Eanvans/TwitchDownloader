@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -129,6 +130,10 @@ namespace TwitchDownloaderWPF
 
             try
             {
+                var his = DownloadHistoryExtensions.GetAllDownloadHistories();
+
+                DownloadHistoryExtensions.SaveDownloadHistory(textUrl.Text.Trim());
+
                 if (downloadType == DownloadType.Video)
                 {
                     GqlVideoResponse videoInfo = await TwitchHelper.GetVideoInfo(long.Parse(downloadId));

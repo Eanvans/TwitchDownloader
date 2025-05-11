@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using TwitchDownloaderCore;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 
@@ -19,6 +22,8 @@ namespace TwitchDownloaderWPF
         {
             base.OnStartup(e);
 
+            ConfigureServiceCollection();
+
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
@@ -31,11 +36,28 @@ namespace TwitchDownloaderWPF
             var windowsThemeService = new WindowsThemeService();
             ThemeServiceSingleton = new ThemeService(this, windowsThemeService);
 
+            ConfigureDBService();
+
             MainWindow = new MainWindow
             {
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
             };
             MainWindow.Show();
+        }
+
+
+        private void ConfigureServiceCollection()
+        {
+            var sc = new ServiceCollection();
+            sc.AddSingleton<TwitchDownloaderDB>();
+
+            Appbase.ServiceProvider = sc.BuildServiceProvider();
+        }
+
+        private void ConfigureDBService()
+        {
+            TwitchDownloaderDB db = Appbase.ServiceProvider.GetService<TwitchDownloaderDB>();
+            db.Database.EnsureCreated();
         }
 
         private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
