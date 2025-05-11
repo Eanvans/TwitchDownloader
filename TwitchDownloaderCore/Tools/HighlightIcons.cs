@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.TwitchObjects;
 
@@ -348,7 +349,7 @@ namespace TwitchDownloaderCore.Tools
             customMessageComment.message.fragments.RemoveAt(0);
             return (streakMessageComment, customMessageComment);
         }
-#region ImplementIDisposable
+        #region ImplementIDisposable
 
         public void Dispose()
         {
@@ -385,6 +386,6 @@ namespace TwitchDownloaderCore.Tools
             }
         }
 
-#endregion
+        #endregion
     }
 }

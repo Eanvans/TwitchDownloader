@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using TwitchDownloaderCore;
-using TwitchDownloaderCore.Extensions;
+using TwitchDownloaderCore.Repository;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -267,6 +268,44 @@ namespace TwitchDownloaderCore
             return returnList;
         }
 
+        public async Task<ChatRoot> DownloadChat(CancellationToken cancellationToken)
+        {
+            //just download for some data stuff
+            DownloadType downloadType = downloadOptions.Id.All(char.IsDigit) ? DownloadType.Video : DownloadType.Clip;
+
+            var (chatRoot, connectionCount) = await InitChatRoot(downloadType);
+
+            chatRoot.comments = await DownloadComments(downloadType, chatRoot.video, connectionCount, cancellationToken);
+
+            // do some data analyze work
+            //List<DateTime> timeSlot = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
+
+            // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
+            if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)
+            {
+                chatRoot.video.length = lastComment.content_offset_seconds;
+                if (chatRoot.video.end <= 0)
+                {
+                    chatRoot.video.end = lastComment.content_offset_seconds;
+                }
+            }
+
+            if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
+            {
+                await EmbedImages(chatRoot, cancellationToken);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (downloadOptions.DownloadFormat is ChatFormat.Json)
+            {
+                await BackfillUserInfo(chatRoot);
+            }
+
+            _progress.SetStatus("Writing Output File");
+            return chatRoot;
+        }
+
         public async Task DownloadAsync(CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(downloadOptions.Id))
@@ -274,7 +313,8 @@ namespace TwitchDownloaderCore
                 throw new NullReferenceException("Null or empty video/clip ID");
             }
 
-            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileCollisionCallback, _progress);
+            var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename,
+           downloadOptions.FileCollisionCallback, _progress);
             downloadOptions.Filename = outputFileInfo.FullName;
 
             // Open the destination file so that it exists in the filesystem.
@@ -289,7 +329,6 @@ namespace TwitchDownloaderCore
                 await Task.Delay(100, CancellationToken.None);
 
                 TwitchHelper.CleanUpClaimedFile(outputFileInfo, outputFs, _progress);
-
                 throw;
             }
         }
@@ -303,8 +342,7 @@ namespace TwitchDownloaderCore
             chatRoot.comments = await DownloadComments(downloadType, chatRoot.video, connectionCount, cancellationToken);
 
             // do some data analyze work
-            List<DateTime> timeSlot = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
-
+            //List<DateTime> timeSlot = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
 
             // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
             if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)

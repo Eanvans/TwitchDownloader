@@ -23,6 +23,7 @@ using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.Utils;
+using TwitchDownloaderWPF.Views.ViewModels;
 using WpfAnimatedGif;
 
 namespace TwitchDownloaderWPF
@@ -40,10 +41,13 @@ namespace TwitchDownloaderWPF
         public string game;
         public string streamerId;
         private CancellationTokenSource _cancellationTokenSource;
+        private ChatDownloadViewModels _dchatDownloadVM;
 
         public PageVodDownload()
         {
             InitializeComponent();
+            _dchatDownloadVM = new();
+            mainDGrid.DataContext = _dchatDownloadVM;
         }
 
         private void SetEnabled(bool isEnabled)
@@ -82,6 +86,39 @@ namespace TwitchDownloaderWPF
         private async void btnGetInfo_Click(object sender, RoutedEventArgs e)
         {
             await GetVideoInfo();
+
+            await SelectChatInfo();
+        }
+
+        private async Task SelectChatInfo()
+        {
+            // file not been saved
+            ChatDownloadOptions downloadOptions = GetChatOptions("");
+
+            var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+            var currentDownload = new ChatDownloader(downloadOptions, downloadProgress);
+
+            CancellationTokenSource c = new CancellationTokenSource();
+
+            try
+            {
+                var chatRoot = await currentDownload.DownloadChat(c.Token);
+
+                var rst = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
+
+                _dchatDownloadVM.SetVodCommentsData(rst);
+
+                downloadProgress.SetStatus(Translations.Strings.StatusDone);
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && c.IsCancellationRequested)
+            {
+                downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
+            }
+            catch (Exception ex)
+            {
+                downloadProgress.SetStatus(Translations.Strings.StatusError);
+            }
+            c.Dispose();
         }
 
         private async Task GetVideoInfo()

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 

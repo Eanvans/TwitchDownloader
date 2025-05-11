@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Services
@@ -14,12 +15,10 @@ namespace TwitchDownloaderCore.Services
         /// IQR = Q3 - Q1 
         /// highlight time is time interval about Q3 + 1.5*IQR 
         /// </summary>
-        public static List<DateTime> FindHotCommentsTimeline(ChatRoot root, TimeSpan? interval = null)
+        public static List<VodCommentData> FindHotCommentsTimeline(ChatRoot root, TimeSpan? interval = null)
         {
             if (interval == null)
                 interval = DEFAULT_TIME_INTERVAL;
-
-            List<DateTime> timelineList = new();
 
             // 分组并计数
             var timelineData = root.comments
@@ -57,12 +56,19 @@ namespace TwitchDownloaderCore.Services
                 .Select(s => TimeSpan.FromSeconds(s.BeginOffset))
                 .ToList();
 
+            List<VodCommentData> rst = new();
             foreach (var item in selectedTimeline)
             {
-                timelineList.Add(item.TimeSlot);
+                rst.Add(new VodCommentData()
+                {
+                    TimeInterval = item.TimeSlot.ToShortDateString(),
+                    CommentsCount = item.Count,
+                    OffsetSeconds = item.BeginOffset,
+                });
             }
 
-            return timelineList;
+            rst = rst.OrderByDescending(s => s.CommentsCount).ToList();
+            return rst;
         }
     }
 }

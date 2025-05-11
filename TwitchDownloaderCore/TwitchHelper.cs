@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using Mono.Unix;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -15,9 +16,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mono.Unix;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Api;
@@ -179,7 +180,7 @@ namespace TwitchDownloaderCore
             {
                 RequestUri = new Uri("https://gql.twitch.tv/gql"),
                 Method = HttpMethod.Post,
-                Content = new StringContent("{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){clips(first: " + limit + (cursor == "" ? "" : ", after: \\\"" + cursor + "\\\"") +", criteria: { period: " + period + " }) {  edges { cursor, node { id, slug, title, createdAt, curator, { id, displayName }, durationSeconds, thumbnailURL, viewCount, game { id, displayName } } }, pageInfo { hasNextPage, hasPreviousPage } }}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+                Content = new StringContent("{\"query\":\"query{user(login:\\\"" + channelName + "\\\"){clips(first: " + limit + (cursor == "" ? "" : ", after: \\\"" + cursor + "\\\"") + ", criteria: { period: " + period + " }) {  edges { cursor, node { id, slug, title, createdAt, curator, { id, displayName }, durationSeconds, thumbnailURL, viewCount, game { id, displayName } } }, pageInfo { hasNextPage, hasPreviousPage } }}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
             };
             request.Headers.Add("Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp");
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -486,10 +487,10 @@ namespace TwitchDownloaderCore
                 else
                 {
                     emoteResponseQuery = from emote in emoteResponse
-                        where !alreadyAdded.Contains(emote.Code)
-                        let regex = new Regex($@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)")
-                        where comments.Any(comment => regex.IsMatch(comment.message.body))
-                        select emote;
+                                         where !alreadyAdded.Contains(emote.Code)
+                                         let regex = new Regex($@"(?<=^|\s){Regex.Escape(emote.Code)}(?=$|\s)")
+                                         where comments.Any(comment => regex.IsMatch(comment.message.body))
+                                         select emote;
                 }
 
                 foreach (var emote in emoteResponseQuery)
@@ -694,7 +695,7 @@ namespace TwitchDownloaderCore
             if (!badgeFolder.Exists)
                 badgeFolder = CreateDirectory(badgeFolder.FullName);
 
-            foreach(var badge in badgesData)
+            foreach (var badge in badgesData)
             {
                 try
                 {
@@ -880,12 +881,12 @@ namespace TwitchDownloaderCore
                     string templateURL = cheerGroup.templateURL;
 
                     var cheerNodesQuery = from node in cheerGroup.nodes
-                        where !alreadyAdded.Contains(node.prefix)
-                        let regex = new Regex($@"(?<=^|\s){Regex.Escape(node.prefix)}(?=[1-9])")
-                        where comments
-                            .Where(comment => comment.message.bits_spent > 0)
-                            .Any(comment => regex.IsMatch(comment.message.body))
-                        select node;
+                                          where !alreadyAdded.Contains(node.prefix)
+                                          let regex = new Regex($@"(?<=^|\s){Regex.Escape(node.prefix)}(?=[1-9])")
+                                          where comments
+                                              .Where(comment => comment.message.bits_spent > 0)
+                                              .Any(comment => regex.IsMatch(comment.message.body))
+                                          select node;
 
                     foreach (CheerNode node in cheerNodesQuery)
                     {
@@ -1026,10 +1027,10 @@ namespace TwitchDownloaderCore
             var allCacheDirectories = Directory.GetDirectories(cacheFolder);
 
             var oldVideoCaches = (from directory in allCacheDirectories
-                    where videoFolderRegex.IsMatch(directory)
-                    let directoryInfo = new DirectoryInfo(directory)
-                    where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
-                    select directoryInfo)
+                                  where videoFolderRegex.IsMatch(directory)
+                                  let directoryInfo = new DirectoryInfo(directory)
+                                  where DateTime.UtcNow.Ticks - directoryInfo.LastWriteTimeUtc.Ticks > TimeSpan.TicksPerDay * 7
+                                  select directoryInfo)
                 .ToArray();
 
             if (oldVideoCaches.Length == 0)

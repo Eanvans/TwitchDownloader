@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -1312,7 +1313,7 @@ namespace TwitchDownloaderCore
             {
                 if (highlightWords)
                 {
-                    using var paint = new SKPaint { Color = Purple};
+                    using var paint = new SKPaint { Color = Purple };
                     sectionImageCanvas.DrawRect(drawPos.X, 0, textWidth + (padding ? renderOptions.WordSpacing : 0), renderOptions.SectionHeight, paint);
                 }
 
@@ -1885,7 +1886,7 @@ namespace TwitchDownloaderCore
             return chatRoot;
         }
 
-#region ImplementIDisposable
+        #region ImplementIDisposable
 
         public void Dispose()
         {
@@ -1944,6 +1945,6 @@ namespace TwitchDownloaderCore
             }
         }
 
-#endregion
+        #endregion
     }
 }

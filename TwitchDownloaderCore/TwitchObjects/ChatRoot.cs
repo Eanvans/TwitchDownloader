@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.TwitchObjects
 {
@@ -155,34 +156,6 @@ namespace TwitchDownloaderCore.TwitchObjects
         }
     }
 
-    [DebuggerDisplay("{commenter} {message}")]
-    public class Comment
-    {
-        public string _id { get; set; }
-        public DateTime created_at { get; set; }
-        public string channel_id { get; set; }
-        public string content_type { get; set; }
-        public string content_id { get; set; }
-        public double content_offset_seconds { get; set; }
-        public Commenter commenter { get; set; }
-        public Message message { get; set; }
-
-        public Comment Clone()
-        {
-            return new Comment()
-            {
-                _id = _id,
-                created_at = created_at,
-                channel_id = channel_id,
-                content_type = content_type,
-                content_id = content_id,
-                content_offset_seconds = content_offset_seconds,
-                commenter = commenter.Clone(),
-                message = message.Clone()
-            };
-        }
-    }
-
     public class VideoChapter
     {
         public string id { get; set; }
@@ -211,7 +184,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string game { get; set; }
         public List<VideoChapter> chapters { get; set; } = new();
 
-#region DeprecatedProperties
+        #region DeprecatedProperties
         [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string duration { get; set; } = null;
@@ -221,7 +194,7 @@ namespace TwitchDownloaderCore.TwitchObjects
         [Obsolete("Used only by chats from before 8d521f7a78222bec187b56c3c747909d240add21.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string user_name { get; set; } = null;
-#endregion
+        #endregion
     }
 
     [DebuggerDisplay("{name}")]
