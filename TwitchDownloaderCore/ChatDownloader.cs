@@ -277,9 +277,6 @@ namespace TwitchDownloaderCore
 
             chatRoot.comments = await DownloadComments(downloadType, chatRoot.video, connectionCount, cancellationToken);
 
-            // do some data analyze work
-            //List<DateTime> timeSlot = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
-
             // Sometimes the API returns a video length of 0. Assume the last comment is when the video ends
             if (chatRoot.video.length <= 0 && chatRoot.comments.LastOrDefault() is { } lastComment)
             {
@@ -289,18 +286,7 @@ namespace TwitchDownloaderCore
                     chatRoot.video.end = lastComment.content_offset_seconds;
                 }
             }
-
-            if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
-            {
-                await EmbedImages(chatRoot, cancellationToken);
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (downloadOptions.DownloadFormat is ChatFormat.Json)
-            {
-                await BackfillUserInfo(chatRoot);
-            }
 
             _progress.SetStatus("Writing Output File");
             return chatRoot;
