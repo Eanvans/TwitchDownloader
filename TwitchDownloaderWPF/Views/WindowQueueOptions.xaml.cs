@@ -9,6 +9,7 @@ using TwitchDownloaderCore;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
+using TwitchDownloaderWPF.Enums;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
 using TwitchDownloaderWPF.TwitchTasks;
@@ -25,11 +26,27 @@ namespace TwitchDownloaderWPF
         private readonly List<TaskData> _dataList;
         private readonly Page _parentPage;
 
-        public WindowQueueOptions(Page page)
+        public WindowQueueOptions()
+        {
+            InitializeComponent();
+        }
+
+        public WindowQueueOptions(PageEnum pageEnum) : this()
+        {
+            textFolder.Text = Settings.Default.QueueFolder;
+
+            TextPreferredQuality.Visibility = Visibility.Collapsed;
+            ComboPreferredQuality.Visibility = Visibility.Collapsed;
+            if (pageEnum == PageEnum.VOD_DOWNLOAD)
+            {
+                checkVideo.IsChecked = true;
+                checkVideo.IsEnabled = false;
+            }
+        }
+
+        public WindowQueueOptions(Page page) : this()
         {
             _parentPage = page;
-            InitializeComponent();
-
             textFolder.Text = Settings.Default.QueueFolder;
 
             TextPreferredQuality.Visibility = Visibility.Collapsed;
@@ -164,99 +181,101 @@ namespace TwitchDownloaderWPF
                         }
                     }
 
-                    VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
-                    downloadOptions.DelayDownload = checkDelay.IsChecked.GetValueOrDefault();
-                    downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
+                    // fix later
+                    throw new NotImplementedException();
+                    //VideoDownloadOptions downloadOptions = vodDownloadPage.GetOptions(null, textFolder.Text);
+                    //downloadOptions.DelayDownload = checkDelay.IsChecked.GetValueOrDefault();
+                    //downloadOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                    VodDownloadTask downloadTask = new VodDownloadTask
-                    {
-                        DownloadOptions = downloadOptions,
-                        Info =
-                        {
-                            Title = vodDownloadPage.textTitle.Text,
-                            Thumbnail = vodDownloadPage.imgThumbnail.Source
-                        }
-                    };
+                    //VodDownloadTask downloadTask = new VodDownloadTask
+                    //{
+                    //    DownloadOptions = downloadOptions,
+                    //    Info =
+                    //    {
+                    //        Title = vodDownloadPage.textTitle.Text,
+                    //        Thumbnail = vodDownloadPage.imgThumbnail.Source
+                    //    }
+                    //};
 
-                    lock (PageQueue.taskLock)
-                    {
-                        PageQueue.taskList.Add(downloadTask);
-                    }
+                    //lock (PageQueue.taskLock)
+                    //{
+                    //    PageQueue.taskList.Add(downloadTask);
+                    //}
 
-                    if (checkChat.IsChecked.GetValueOrDefault())
-                    {
-                        ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                        chatOptions.Id = downloadOptions.Id.ToString();
-                        if (radioJson.IsChecked == true)
-                            chatOptions.DownloadFormat = ChatFormat.Json;
-                        else if (radioHTML.IsChecked == true)
-                            chatOptions.DownloadFormat = ChatFormat.Html;
-                        else
-                            chatOptions.DownloadFormat = ChatFormat.Text;
-                        // TODO: Support non-json chat compression
-                        if (RadioCompressionGzip.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
-                            chatOptions.Compression = ChatCompression.Gzip;
-                        chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
-                        chatOptions.DelayDownload = checkDelayChat.IsChecked.GetValueOrDefault();
-                        chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + chatOptions.FileExtension);
-                        chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
+                    //if (checkChat.IsChecked.GetValueOrDefault())
+                    //{
+                    //    ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
+                    //    chatOptions.Id = downloadOptions.Id.ToString();
+                    //    if (radioJson.IsChecked == true)
+                    //        chatOptions.DownloadFormat = ChatFormat.Json;
+                    //    else if (radioHTML.IsChecked == true)
+                    //        chatOptions.DownloadFormat = ChatFormat.Html;
+                    //    else
+                    //        chatOptions.DownloadFormat = ChatFormat.Text;
+                    //    // TODO: Support non-json chat compression
+                    //    if (RadioCompressionGzip.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
+                    //        chatOptions.Compression = ChatCompression.Gzip;
+                    //    chatOptions.EmbedData = checkEmbed.IsChecked.GetValueOrDefault();
+                    //    chatOptions.DelayDownload = checkDelayChat.IsChecked.GetValueOrDefault();
+                    //    chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + chatOptions.FileExtension);
+                    //    chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                        if (downloadOptions.TrimBeginning)
-                        {
-                            chatOptions.TrimBeginning = true;
-                            chatOptions.TrimBeginningTime = downloadOptions.TrimBeginningTime.TotalSeconds;
-                        }
+                    //    if (downloadOptions.TrimBeginning)
+                    //    {
+                    //        chatOptions.TrimBeginning = true;
+                    //        chatOptions.TrimBeginningTime = downloadOptions.TrimBeginningTime.TotalSeconds;
+                    //    }
 
-                        if (downloadOptions.TrimEnding)
-                        {
-                            chatOptions.TrimEnding = true;
-                            chatOptions.TrimEndingTime = downloadOptions.TrimEndingTime.TotalSeconds;
-                        }
+                    //    if (downloadOptions.TrimEnding)
+                    //    {
+                    //        chatOptions.TrimEnding = true;
+                    //        chatOptions.TrimEndingTime = downloadOptions.TrimEndingTime.TotalSeconds;
+                    //    }
 
-                        ChatDownloadTask chatTask = new ChatDownloadTask
-                        {
-                            DownloadOptions = chatOptions,
-                            Info =
-                            {
-                                Title = vodDownloadPage.textTitle.Text,
-                                Thumbnail = vodDownloadPage.imgThumbnail.Source
-                            }
-                        };
+                    //    ChatDownloadTask chatTask = new ChatDownloadTask
+                    //    {
+                    //        DownloadOptions = chatOptions,
+                    //        Info =
+                    //        {
+                    //            Title = vodDownloadPage.textTitle.Text,
+                    //            Thumbnail = vodDownloadPage.imgThumbnail.Source
+                    //        }
+                    //    };
 
-                        lock (PageQueue.taskLock)
-                        {
-                            PageQueue.taskList.Add(chatTask);
-                        }
+                    //    lock (PageQueue.taskLock)
+                    //    {
+                    //        PageQueue.taskList.Add(chatTask);
+                    //    }
 
-                        if (checkRender.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
-                        {
-                            ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
-                            if (renderOptions.OutputFile.Trim() == downloadOptions.Filename!.Trim())
-                            {
-                                //Just in case VOD and chat paths are the same. Like the previous defaults
-                                renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
-                            }
-                            renderOptions.InputFile = chatOptions.Filename;
-                            renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
+                    //    if (checkRender.IsChecked.GetValueOrDefault() && chatOptions.DownloadFormat == ChatFormat.Json)
+                    //    {
+                    //        ChatRenderOptions renderOptions = MainWindow.pageChatRender.GetOptions(Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), '.' + MainWindow.pageChatRender.comboFormat.Text.ToLower()));
+                    //        if (renderOptions.OutputFile.Trim() == downloadOptions.Filename!.Trim())
+                    //        {
+                    //            //Just in case VOD and chat paths are the same. Like the previous defaults
+                    //            renderOptions.OutputFile = Path.ChangeExtension(chatOptions.Filename.Replace(".gz", ""), " - CHAT." + MainWindow.pageChatRender.comboFormat.Text.ToLower());
+                    //        }
+                    //        renderOptions.InputFile = chatOptions.Filename;
+                    //        renderOptions.FileCollisionCallback = HandleFileCollisionCallback;
 
-                            ChatRenderTask renderTask = new ChatRenderTask
-                            {
-                                DownloadOptions = renderOptions,
-                                Info =
-                                {
-                                    Title = vodDownloadPage.textTitle.Text,
-                                    Thumbnail = vodDownloadPage.imgThumbnail.Source
-                                },
-                                DependantTask = chatTask,
-                            };
-                            renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
+                    //        ChatRenderTask renderTask = new ChatRenderTask
+                    //        {
+                    //            DownloadOptions = renderOptions,
+                    //            Info =
+                    //            {
+                    //                Title = vodDownloadPage.textTitle.Text,
+                    //                Thumbnail = vodDownloadPage.imgThumbnail.Source
+                    //            },
+                    //            DependantTask = chatTask,
+                    //        };
+                    //        renderTask.ChangeStatus(TwitchTaskStatus.Waiting);
 
-                            lock (PageQueue.taskLock)
-                            {
-                                PageQueue.taskList.Add(renderTask);
-                            }
-                        }
-                    }
+                    //        lock (PageQueue.taskLock)
+                    //        {
+                    //            PageQueue.taskList.Add(renderTask);
+                    //        }
+                    //    }
+                    //}
 
                     this.Close();
                 }
@@ -406,7 +425,7 @@ namespace TwitchDownloaderWPF
                     }
 
                     ChatDownloadOptions chatOptions = MainWindow.pageChatDownload.GetOptions(null);
-                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id,chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
+                    chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, chatDownloadPage.textTitle.Text, chatOptions.Id, chatDownloadPage.currentVideoTime, chatDownloadPage.textStreamer.Text,
                         chatDownloadPage.streamerId,
                         chatOptions.TrimBeginning ? TimeSpan.FromSeconds(chatOptions.TrimBeginningTime) : TimeSpan.Zero,
                         chatOptions.TrimEnding ? TimeSpan.FromSeconds(chatOptions.TrimEndingTime) : chatDownloadPage.vodLength,

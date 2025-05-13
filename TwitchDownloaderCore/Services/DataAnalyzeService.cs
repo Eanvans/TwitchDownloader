@@ -20,6 +20,8 @@ namespace TwitchDownloaderCore.Services
             if (interval == null)
                 interval = DEFAULT_TIME_INTERVAL;
 
+            interval = TimeSpan.FromMinutes(1);
+
             // 分组并计数
             var timelineData = root.comments
                 .GroupBy(d => new DateTime(
@@ -48,9 +50,24 @@ namespace TwitchDownloaderCore.Services
             var iqr = q3 - q1;
             var highThr = q3 + (int)(1.5 * iqr);
 
+            VodCommentStats stat = new VodCommentStats();
+            foreach (var item in orderbyTimeline)
+            {
+                stat.AddData(new VodCommentData()
+                {
+                    TimeInterval = item.TimeSlot.ToShortDateString(),
+                    CommentsCount = item.Count,
+                    OffsetSeconds = item.BeginOffset,
+                });
+            }
+
             var selectedTimeline = orderbyCount
                  .Where(s => s.Count > highThr)
                  .ToList();
+
+            var selected3SigmaTimeline = orderbyCount
+                .Where(s => s.Count > 3 * stat.Sigma)
+                .ToList();
 
             var timeLineOffsets = selectedTimeline
                 .Select(s => TimeSpan.FromSeconds(s.BeginOffset))

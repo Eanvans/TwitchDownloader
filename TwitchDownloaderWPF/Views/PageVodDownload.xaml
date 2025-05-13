@@ -14,6 +14,7 @@
       xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
       xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:vm="clr-namespace:TwitchDownloaderWPF.Views.ViewModels"
       x:Class="TwitchDownloaderWPF.PageVodDownload"
       mc:Ignorable="d"
       d:DesignHeight="800" d:DesignWidth="800"
@@ -23,7 +24,9 @@
             <Setter Property="behave:TextBoxTripleClickBehavior.TripleClickSelectLine" Value="True" />
         </Style>
     </Page.Resources>
-
+    <Page.DataContext>
+        <vm:VodDownloadVM></vm:VodDownloadVM>
+    </Page.DataContext>    
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -44,30 +47,36 @@
         <!-- LEFT -->
         <StackPanel Margin="0,21,0,0" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
             <Border BorderBrush="{DynamicResource AppElementBorder}" BorderThickness="1">
-                <Image Stretch="Fill" StretchDirection="Both" x:Name="imgThumbnail" MinHeight="100"/>
+                <Image Stretch="Fill" StretchDirection="Both" Source="{Binding ImgThumb}" MinHeight="100"/>
             </Border>
             <WrapPanel Orientation="Horizontal">
                 <TextBlock Margin="0,3,3,3" Text="{lex:Loc Streamer}" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3" x:Name="textStreamer" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3" Text="{Binding TextStreamer}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
                 <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoCreatedAt}" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3" x:Name="textCreatedAt" Foreground="{DynamicResource AppText}" />
+                <TextBlock Margin="3" Text="{Binding TextCreatedAt}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
             <WrapPanel Orientation="Horizontal">
                 <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoTitle}" Foreground="{DynamicResource AppText}" />
             </WrapPanel>
-            <emoji:TextBlock TextWrapping="Wrap" x:Name="textTitle" Foreground="{DynamicResource AppText}" />
+            <emoji:TextBlock TextWrapping="Wrap" Text="{Binding TextTitle}" Foreground="{DynamicResource AppText}" />
         </StackPanel>
         
         <!-- MIDDLE -->
         <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
             <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
-            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}" 
-                    Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" 
+            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" 
+                     Text="{Binding LinkUrl}"
+                     Background="{DynamicResource AppElementBackground}" 
+                     BorderBrush="{DynamicResource AppElementBorder}" 
+                     Foreground="{DynamicResource AppText}" />
+            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}"                    
+                    Background="{DynamicResource ActionButtonBackground}" 
                     Foreground="{DynamicResource ActionButtonText}" 
-                    BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                    BorderBrush="{DynamicResource ActionButtonBorder}"
+                    Command="{Binding OnGetVideoInfo}"/>
+            <CheckBox Margin="5 5 0 0" Content="Analyze Chat Data" IsChecked="{Binding IsAnalyzeComments}"/>
         </WrapPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" >
@@ -90,31 +99,51 @@
                 </StackPanel>
 
                 <StackPanel>
-                    <TextBlock x:Name="labelLength" Text="0:0:0" Margin="5,0,0,0" Foreground="{DynamicResource AppText}" />
-                    <ComboBox x:Name="comboQuality" Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                    <TextBlock x:Name="labelLength" 
+                               Text="0:0:0" Margin="5,0,0,0"
+                               Foreground="{DynamicResource AppText}" />
+                    <ComboBox Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" 
+                              ItemsSource="{Binding ComboQuality}"
+                              BorderBrush="{DynamicResource AppElementBorder}" 
+                              Foreground="{DynamicResource AppText}"/>
                     <StackPanel Margin="5,8,0,0">
                         <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="RadioTrimSafe" Content="{lex:Loc VideoTrimModeSafe}" Margin="3,0,0,0" Checked="RadioTrimSafe_OnCheckedStateChanged" Unchecked="RadioTrimSafe_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                             <RadioButton x:Name="RadioTrimExact" Content="{lex:Loc VideoTrimModeExact}" IsChecked="True" Margin="3,0,0,0" Checked="RadioTrimExact_OnCheckedStateChanged" Unchecked="RadioTrimExact_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkStart_OnCheckStateChanged" Unchecked="checkStart_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}"/>
+                            <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                      IsChecked="{Binding IsCheckStart}"
+                                      BorderBrush="{DynamicResource AppElementBorder}"/>
                             <TextBlock Margin="2,0,0,0" Text="{lex:Loc TrimStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
                             <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numStartHour" ValueChanged="numStartHour_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                             <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numStartMinute" ValueChanged="numStartMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                             <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numStartSecond" ValueChanged="numStartSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged" BorderBrush="{DynamicResource AppElementBorder}"/>
+                            <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                      IsChecked="{Binding IsCheckEnd}"
+                                      Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged"
+                                      BorderBrush="{DynamicResource AppElementBorder}"/>
                             <TextBlock Text="{lex:Loc TrimEnd}" VerticalAlignment="Center" Margin="2,0,5,0" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numEndHour" ValueChanged="numEndHour_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndMinute" ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndSecond" ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numEndHour" 
+                                              ValueChanged="numEndHour_ValueChanged" Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndMinute" 
+                                              ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndSecond" 
+                                              ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Value="4" Maximum="20" x:Name="numDownloadThreads" HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <CheckBox x:Name="chkWithChats" Margin="5 5 0 0" Content="Download With Chats" IsChecked="False"/>
+                            <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Maximum="20" 
+                                              HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" 
+                                              Value="{Binding NumDownloadThreads}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
                         </StackPanel>
 
                         <TextBox x:Name="TextOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -123,11 +152,14 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-                <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" Click="SplitBtnDownloader_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}" >
+                <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" 
+                                Command="{Binding OnDownLoad}" Background="{DynamicResource ActionButtonBackground}" 
+                                Foreground="{DynamicResource ActionButtonText}" 
+                                BorderBrush="{DynamicResource ActionButtonBorder}" >
                     <hc:SplitButton.DropDownContent>
                         <StackPanel>
                             <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" 
-                          Click="MenuItemEnqueue_Click"/>
+                                      Command="{Binding OnEnqueueDownload}"/>
                         </StackPanel>
                     </hc:SplitButton.DropDownContent>
                 </hc:SplitButton>
@@ -146,7 +178,10 @@
         
         <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
             <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}" />
-            <RichTextBox Margin="0,5" IsReadOnly="True" x:Name="textLog" Height="230" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+            <RichTextBox Margin="0,5" IsReadOnly="True" x:Name="textLog" Height="230" 
+                         Background="{DynamicResource AppElementBackground}" 
+                         BorderBrush="{DynamicResource AppElementBorder}" 
+                         Foreground="{DynamicResource AppText}">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />
@@ -155,7 +190,7 @@
             </RichTextBox>
         </StackPanel>
 
-        <Grid x:Name="mainDGrid" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
+        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <!--<ColumnDefinition Width="1*"/>-->
@@ -189,7 +224,9 @@
                 <TextBlock Text="{lex:Loc StatusIdle}" x:Name="statusMessage" FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
             </StatusBarItem>
             <StatusBarItem Padding="10,1,10,1" HorizontalAlignment="Right">
-                <ProgressBar Width="200" Height="14" x:Name="statusProgressBar" Background="{DynamicResource StatusBarElement}" Foreground="{DynamicResource ProgressBarForeground}"/>
+                <ProgressBar Width="200" Height="14" Value="{Binding StatusProgressBarValue}" 
+                             Background="{DynamicResource StatusBarElement}" 
+                             Foreground="{DynamicResource ProgressBarForeground}"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
