@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TwitchDownloaderCore.Models;
@@ -69,9 +70,11 @@ namespace TwitchDownloaderCore.Services
                 .Where(s => s.Count > 3 * stat.Sigma)
                 .ToList();
 
+            var str = JsonConvert.SerializeObject(orderbyCount);
+
             var timeLineOffsets = selectedTimeline
-                .Select(s => TimeSpan.FromSeconds(s.BeginOffset))
-                .ToList();
+               .Select(s => TimeSpan.FromSeconds(s.BeginOffset))
+               .ToList();
 
             List<VodCommentData> rst = new();
             foreach (var item in selectedTimeline)
