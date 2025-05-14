@@ -78,9 +78,9 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
-            SetEnabled(false);
-            SetEnabledTrimStart(false);
-            SetEnabledTrimEnd(false);
+            //SetEnabled(false);
+            //SetEnabledTrimStart(false);
+            //SetEnabledTrimEnd(false);
             WebRequest.DefaultWebProxy = null;
             //numDownloadThreads.Value = Settings.Default.VodDownloadThreads;
             TextOauth.Text = Settings.Default.OAuth;

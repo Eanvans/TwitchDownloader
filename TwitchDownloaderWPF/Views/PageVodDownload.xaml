@@ -100,7 +100,7 @@
 
                 <StackPanel>
                     <TextBlock x:Name="labelLength" 
-                               Text="0:0:0" Margin="5,0,0,0"
+                               Text="{Binding VoidLengthStr}" Margin="5,0,0,0"
                                Foreground="{DynamicResource AppText}" />
                     <ComboBox Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" 
                               ItemsSource="{Binding ComboQuality}"

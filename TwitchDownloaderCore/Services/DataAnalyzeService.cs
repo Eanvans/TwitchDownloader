@@ -29,7 +29,7 @@ namespace TwitchDownloaderCore.Services
                     d.created_at.Month,
                     d.created_at.Day,
                     d.created_at.Hour,
-                    d.created_at.Minute / 5 * 5, // 将分钟向下取整到最接近的5分钟倍数
+                    d.created_at.Minute, // 将分钟向下取整到最接近的5分钟倍数
                     0))
                 .Select(g => new
                 {

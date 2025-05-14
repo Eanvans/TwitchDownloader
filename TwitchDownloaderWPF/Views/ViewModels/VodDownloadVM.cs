@@ -51,10 +51,10 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private double _numEndMinute = 0;
         private double _numStartSecond = 0;
         private double _numEndSecond = 0;
+        private TimeSpan vodLength;
 
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public long currentVideoId;
-        public TimeSpan vodLength;
         public DateTime currentVideoTime;
         public int viewCount;
         public string game;
@@ -92,9 +92,19 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public double NumEndMinute { get => _numEndMinute; set => SetProperty(ref _numEndMinute, value); }
         public double NumStartSecond { get => _numStartSecond; set => SetProperty(ref _numStartSecond, value); }
         public double NumEndSecond { get => _numEndSecond; set => SetProperty(ref _numEndSecond, value); }
+        public TimeSpan VodLength
+        {
+            get => vodLength;
+            set
+            {
+                SetProperty(ref vodLength, value);
+            }
+        }
+        public string VoidLengthStr => VodLength.ToString();
 
         protected TimeSpan StartTime => new TimeSpan((int)NumStartHour, (int)NumStartMinute, (int)NumStartSecond);
         protected TimeSpan EndTime => new TimeSpan((int)NumEndHour, (int)NumEndMinute, (int)NumEndSecond);
+
 
         private async Task SelectChatInfo()
         {
@@ -182,7 +192,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 }
                 ComboQualityIndex = 0;
 
-                vodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
+                VodLength = TimeSpan.FromSeconds(taskVideoInfo.Result.data.video.lengthSeconds);
                 TextStreamer = taskVideoInfo.Result.data.video.owner?.displayName ?? Translations.Strings.UnknownUser;
                 streamerId = taskVideoInfo.Result.data.video.owner?.id;
                 TextTitle = taskVideoInfo.Result.data.video.title;
@@ -217,9 +227,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 //    numEndHour.Maximum = 48;
                 //}
 
-                NumEndHour = (int)vodLength.TotalHours;
-                NumEndMinute = vodLength.Minutes;
-                NumEndSecond = vodLength.Seconds;
+                NumEndHour = (int)VodLength.TotalHours;
+                NumEndMinute = VodLength.Minutes;
+                NumEndSecond = VodLength.Seconds;
                 //labelLength = vodLength.ToString("c");
                 viewCount = taskVideoInfo.Result.data.video.viewCount;
                 game = taskVideoInfo.Result.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
@@ -284,8 +294,8 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, TextTitle, currentVideoId.ToString(),
                     currentVideoTime, TextStreamer, streamerId,
                     IsCheckStart ? StartTime : TimeSpan.Zero,
-                    IsCheckEnd ? EndTime : vodLength,
-                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])),
+                    IsCheckEnd ? EndTime : VodLength,
+                    VodLength, viewCount, game) + FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])),
                 Oauth = OathText,
                 Quality = GetQualityWithoutSize(ComboQuality[ComboQualityIndex]),
                 Id = currentVideoId,
@@ -318,7 +328,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             int selectedIndex = ComboQualityIndex;
 
             var trimStart = IsCheckStart ? StartTime : TimeSpan.Zero;
-            var trimEnd = IsCheckEnd ? EndTime : vodLength;
+            var trimEnd = IsCheckEnd ? EndTime : VodLength;
 
             for (var i = 0; i < ComboQuality.Count; i++)
             {
@@ -373,8 +383,8 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateVod, TextTitle, currentVideoId.ToString(),
                 currentVideoTime, TextStreamer, streamerId,
                     IsCheckStart == true ? StartTime : TimeSpan.Zero,
-                    IsCheckEnd == true ? EndTime : vodLength,
-                    vodLength, viewCount, game) + FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])
+                    IsCheckEnd == true ? EndTime : VodLength,
+                    VodLength, viewCount, game) + FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])
             };
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
@@ -493,7 +503,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             if (IsCheckStart)
             {
                 var beginTime = StartTime;
-                if (vodLength > TimeSpan.Zero && beginTime.TotalSeconds >= vodLength.TotalSeconds)
+                if (VodLength > TimeSpan.Zero && beginTime.TotalSeconds >= VodLength.TotalSeconds)
                 {
                     return false;
                 }
