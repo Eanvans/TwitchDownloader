@@ -37,7 +37,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private string _logs = "";
         private string _oathText = "";
         private BitmapImage _imgThumb = null;
-        private List<string> _comboQuality = new();
+        private ObservableCollection<string> _comboQuality = new();
         private int _comboQualityIndex = 0;
         private string _textStreamer = "";
         private string _textTitle = "";
@@ -52,6 +52,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private double _numStartSecond = 0;
         private double _numEndSecond = 0;
         private TimeSpan vodLength;
+        private string _vodlengthStr;
 
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public long currentVideoId;
@@ -78,7 +79,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public string Logs { get => _logs; set => SetProperty(ref _logs, value); }
         public string OathText { get => _oathText; set => SetProperty(ref _oathText, value); }
         public BitmapImage ImgThumb { get => _imgThumb; set => SetProperty(ref _imgThumb, value); }
-        public List<string> ComboQuality { get => _comboQuality; set => SetProperty(ref _comboQuality, value); }
+        public ObservableCollection<string> ComboQuality { get => _comboQuality; set => SetProperty(ref _comboQuality, value); }
         public int ComboQualityIndex { get => _comboQualityIndex; set => SetProperty(ref _comboQualityIndex, value); }
         public string TextStreamer { get => _textStreamer; set => SetProperty(ref _textStreamer, value); }
         public string TextTitle { get => _textTitle; set => SetProperty(ref _textTitle, value); }
@@ -95,12 +96,13 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public TimeSpan VodLength
         {
             get => vodLength;
-            set
+            private set
             {
-                SetProperty(ref vodLength, value);
+                vodLength = value;
+                VodLengthStr = value.ToString();
             }
         }
-        public string VoidLengthStr => VodLength.ToString();
+        public string VodLengthStr { get => _vodlengthStr; set => SetProperty(ref _vodlengthStr, value); }
 
         protected TimeSpan StartTime => new TimeSpan((int)NumStartHour, (int)NumStartMinute, (int)NumStartSecond);
         protected TimeSpan EndTime => new TimeSpan((int)NumEndHour, (int)NumEndMinute, (int)NumEndSecond);

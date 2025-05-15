@@ -100,12 +100,15 @@
 
                 <StackPanel>
                     <TextBlock x:Name="labelLength" 
-                               Text="{Binding VoidLengthStr}" Margin="5,0,0,0"
+                               Text="{Binding VodLengthStr}" Margin="5,0,0,0"
                                Foreground="{DynamicResource AppText}" />
+                    
                     <ComboBox Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" 
                               ItemsSource="{Binding ComboQuality}"
+                              SelectedIndex="{Binding ComboQualityIndex}"
                               BorderBrush="{DynamicResource AppElementBorder}" 
                               Foreground="{DynamicResource AppText}"/>
+                    
                     <StackPanel Margin="5,8,0,0">
                         <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="RadioTrimSafe" Content="{lex:Loc VideoTrimModeSafe}" Margin="3,0,0,0" Checked="RadioTrimSafe_OnCheckedStateChanged" Unchecked="RadioTrimSafe_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
@@ -116,30 +119,46 @@
                                       IsChecked="{Binding IsCheckStart}"
                                       BorderBrush="{DynamicResource AppElementBorder}"/>
                             <TextBlock Margin="2,0,0,0" Text="{lex:Loc TrimStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numStartHour" ValueChanged="numStartHour_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numStartMinute" ValueChanged="numStartMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numStartSecond" ValueChanged="numStartSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numStartHour" 
+                                              Value="{Binding NumStartHour}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartMinute" 
+                                              Value="{Binding NumStartMinute}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartSecond" 
+                                              Value="{Binding NumStartSecond}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                                      IsChecked="{Binding IsCheckEnd}"
-                                      Checked="checkEnd_OnCheckStateChanged" Unchecked="checkEnd_OnCheckStateChanged"
+                                      IsChecked="{Binding IsCheckEnd}"                                      
                                       BorderBrush="{DynamicResource AppElementBorder}"/>
                             <TextBlock Text="{lex:Loc TrimEnd}" VerticalAlignment="Center" Margin="2,0,5,0" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" Value="0" x:Name="numEndHour" 
-                                              ValueChanged="numEndHour_ValueChanged" Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndMinute" 
-                                              ValueChanged="numEndMinute_ValueChanged" Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" Value="0" x:Name="numEndSecond" 
-                                              ValueChanged="numEndSecond_ValueChanged" Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numEndHour" 
+                                              Value="{Binding NumEndHour}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndMinute" 
+                                              Value="{Binding NumEndMinute}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
+                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndSecond" 
+                                              Value="{Binding NumEndSecond}"
+                                              Background="{DynamicResource AppElementBackground}" 
+                                              BorderBrush="{DynamicResource AppElementBorder}" 
+                                              Foreground="{DynamicResource AppText}" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Maximum="20" 
-                                              HorizontalAlignment="Left" ValueChanged="numDownloadThreads_ValueChanged" 
+                                              HorizontalAlignment="Left" 
                                               Value="{Binding NumDownloadThreads}"
                                               Background="{DynamicResource AppElementBackground}" 
                                               BorderBrush="{DynamicResource AppElementBorder}" 
@@ -164,7 +183,9 @@
                     </hc:SplitButton.DropDownContent>
                 </hc:SplitButton>
                 <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" 
-            Click="BtnCancel_Click" Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                        Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" 
+                        Foreground="{DynamicResource ActionButtonText}" 
+                        BorderBrush="{DynamicResource ActionButtonBorder}"/>
             </StackPanel>
         </StackPanel>
        
