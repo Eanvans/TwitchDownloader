@@ -11,7 +11,9 @@ namespace TwitchDownloaderCore.Services
 {
     public static class FilenameService
     {
-        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date, [AllowNull] string channel, [AllowNull] string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
+        public static string GetFilename(string template, [AllowNull] string title, [AllowNull] string id, DateTime date,
+            [AllowNull] string channel, [AllowNull] string channelId,
+            TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, long viewCount,
             [AllowNull] string game, [AllowNull] string clipper = null, [AllowNull] string clipperId = null)
         {
             var trimLength = trimEnd - trimStart;

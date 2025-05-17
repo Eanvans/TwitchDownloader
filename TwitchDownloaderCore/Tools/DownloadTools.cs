@@ -64,29 +64,30 @@ namespace TwitchDownloaderCore.Tools
             switch (throttleKib)
             {
                 case -1:
-                {
-                    await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
-                    await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
-                    break;
-                }
+                    {
+                        await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write,
+                            FileShare.Read);
+                        await response.Content.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                        break;
+                    }
                 default:
-                {
-                    try
                     {
-                        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                        await using var throttledStream = new ThrottledStream(contentStream, throttleKib);
-                        await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
-                        await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                            await using var throttledStream = new ThrottledStream(contentStream, throttleKib);
+                            await using var fs = new FileStream(destinationFile, fileMode, FileAccess.Write, FileShare.Read);
+                            await throttledStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (IOException ex) when (ex.Message.Contains("EOF"))
+                        {
+                            // If we get an exception for EOF, it may be related to the throttler. Try again without it.
+                            logger.LogVerbose($"Unexpected EOF, retrying without bandwidth throttle. Message: {ex.Message}.");
+                            await Task.Delay(2_000, cancellationToken);
+                            goto case -1;
+                        }
+                        break;
                     }
-                    catch (IOException ex) when (ex.Message.Contains("EOF"))
-                    {
-                        // If we get an exception for EOF, it may be related to the throttler. Try again without it.
-                        logger.LogVerbose($"Unexpected EOF, retrying without bandwidth throttle. Message: {ex.Message}.");
-                        await Task.Delay(2_000, cancellationToken);
-                        goto case -1;
-                    }
-                    break;
-                }
             }
 
             // Reset the cts timer so it can be reused for the next download on this thread.

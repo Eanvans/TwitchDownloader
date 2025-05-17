@@ -44,7 +44,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private string _textCreatedAt = "";
         private bool _isCheckStart = false;
         private bool _isCheckEnd = false;
-        private int _numDownloadThreads = 6;
+        private int _numDownloadThreads = 12;
         private double _numStartHour = 0;
         private double _numEndHour = 0;
         private double _numStartMinute = 0;
@@ -69,7 +69,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public ICommand OnGetVideoInfo => new RelayCommand(GetVideoInfoClick, () => _idle);
         public ICommand OnDownLoad => new RelayCommand(DownloadClick);
         public ICommand OnEnqueueDownload => new RelayCommand(EnququeDownload);
-
+        public ICommand OnDownloadClip => new RelayCommand<object>(DownloadClip);
 
         public ObservableCollection<VodCommentData> VodCommentsData { get => _vodCommentsData; set => SetProperty(ref _vodCommentsData, value); }
         public bool IsAnalyzeComments { get => _IsAnalyzeComments; set => SetProperty(ref _IsAnalyzeComments, value); }
@@ -95,8 +95,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public double NumEndSecond { get => _numEndSecond; set => SetProperty(ref _numEndSecond, value); }
         public TimeSpan VodLength
         {
-            get => vodLength;
-            private set
+            get => vodLength; private set
             {
                 vodLength = value;
                 VodLengthStr = value.ToString();
@@ -285,8 +284,18 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             return options;
         }
 
-        public VideoDownloadOptions GetOptions(string filename, string folder)
+        public VideoDownloadOptions GetOptions(string filename, string folder,
+            TimeSpan? st = null, TimeSpan? et = null, bool isCheckStart = false, bool isCheckEnd = false)
         {
+            if (st is null)
+            {
+                st = StartTime;
+            }
+            if (et is null)
+            {
+                et = EndTime;
+            }
+
             VideoDownloadOptions options = new VideoDownloadOptions
             {
                 DownloadThreads = NumDownloadThreads,
@@ -295,20 +304,22 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                     : -1,
                 Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Settings.Default.TemplateVod, TextTitle, currentVideoId.ToString(),
                     currentVideoTime, TextStreamer, streamerId,
-                    IsCheckStart ? StartTime : TimeSpan.Zero,
-                    IsCheckEnd ? EndTime : VodLength,
+                    isCheckStart ? StartTime : TimeSpan.Zero,
+                    isCheckEnd ? EndTime : VodLength,
                     VodLength, viewCount, game) + FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])),
                 Oauth = OathText,
                 Quality = GetQualityWithoutSize(ComboQuality[ComboQualityIndex]),
                 Id = currentVideoId,
-                TrimBeginning = IsCheckStart,
-                TrimBeginningTime = StartTime,
-                TrimEnding = IsCheckEnd,
-                TrimEndingTime = EndTime,
+
+                TrimBeginning = isCheckStart,
+                TrimEnding = isCheckEnd,
+                TrimBeginningTime = st.GetValueOrDefault(),
+                TrimEndingTime = et.GetValueOrDefault(),
                 FfmpegPath = "ffmpeg",
                 TempFolder = Settings.Default.TempPath
             };
 
+            //TODO 
             //if (RadioTrimSafe.IsChecked == true)
             //    options.TrimMode = VideoTrimMode.Safe;
             //else if (RadioTrimExact.IsChecked == true)
@@ -379,6 +390,8 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 return;
             }
 
+            if (ComboQuality.Count < 1) return;
+
             System.Windows.Forms.SaveFileDialog saveFileDialog = new()
             {
                 Filter = ComboQuality.Contains("Audio") ? "M4A Files | *.m4a" : "MP4 Files | *.mp4",
@@ -394,11 +407,73 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 return;
             }
 
-            //SetEnabled(false);
-            //btnGetInfo.IsEnabled = false;
             _idle = false;
 
-            VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null);
+            VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null, StartTime, EndTime,
+                IsCheckStart, IsCheckEnd);
+            options.CacheCleanerCallback = HandleCacheCleanerCallback;
+
+            var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+            VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            SetImage("Images/ppOverheat.gif", true);
+            StatusMessage = Translations.Strings.StatusDownloading;
+            //UpdateActionButtons(true);
+            try
+            {
+                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
+                downloadProgress.SetStatus(Translations.Strings.StatusDone);
+                SetImage("Images/ppHop.gif", true);
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
+            {
+                downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
+                SetImage("Images/ppHop.gif", true);
+            }
+            catch (Exception ex)
+            {
+                downloadProgress.SetStatus(Translations.Strings.StatusError);
+                SetImage("Images/peepoSad.png", false);
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                if (Settings.Default.VerboseErrors)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            _idle = true;
+            downloadProgress.ReportProgress(0);
+            _cancellationTokenSource.Dispose();
+            //UpdateActionButtons(false);
+
+            GC.Collect();
+        }
+
+        private async void DownloadClip(object param)
+        {
+            VodCommentData d = param as VodCommentData;
+            TimeSpan st = TimeSpan.FromSeconds(d.OffsetSeconds - 120);
+            TimeSpan et = TimeSpan.FromSeconds(d.OffsetSeconds + 60 + 120);
+
+            // offset to 120s start and 120s end
+            System.Windows.Forms.SaveFileDialog saveFileDialog = new()
+            {
+                Filter = ComboQuality.Contains("Audio") ? "M4A Files | *.m4a" : "MP4 Files | *.mp4",
+                FileName = FilenameService.GetFilename(Settings.Default.TemplateClip + "-{trim_start}", TextTitle, currentVideoId.ToString(),
+                currentVideoTime, TextStreamer, streamerId, st, et,
+                    VodLength, viewCount, game) +
+                    FilenameService.GuessVodFileExtension(ComboQuality[ComboQualityIndex])
+            };
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
+            {
+                return;
+            }
+
+            _idle = false;
+
+            VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null, st, et, true, true);
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
             var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
