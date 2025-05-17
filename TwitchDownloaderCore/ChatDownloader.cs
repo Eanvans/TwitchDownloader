@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.Interfaces;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.Tools;
@@ -418,7 +419,7 @@ namespace TwitchDownloaderCore
             }
             else
             {
-                GqlClipResponse clipInfoResponse = await TwitchHelper.GetClipInfo(videoId);
+                var clipInfoResponse = await TwitchHelper.GetShareClipRenderStatus(videoId);
                 if (clipInfoResponse.data.clip.video == null || clipInfoResponse.data.clip.videoOffsetSeconds == null)
                 {
                     throw new NullReferenceException("Invalid VOD for clip, deleted/expired VOD possibly?");

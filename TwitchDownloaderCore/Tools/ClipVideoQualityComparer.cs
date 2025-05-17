@@ -1,11 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderCore.Tools
 {
-    public class ClipQualityComparer : IComparer<TwitchObjects.Gql.ClipVideoQuality>
+    public class ClipVideoQualityComparer : IComparer<ShareClipRenderStatusVideoQuality>
     {
-        public int Compare(TwitchObjects.Gql.ClipVideoQuality x, TwitchObjects.Gql.ClipVideoQuality y)
+        public int Compare(ShareClipRenderStatusVideoQuality x, ShareClipRenderStatusVideoQuality y)
         {
             if (x is null)
             {
