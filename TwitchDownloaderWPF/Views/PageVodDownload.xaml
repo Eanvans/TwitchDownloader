@@ -110,9 +110,13 @@
                               Foreground="{DynamicResource AppText}"/>
                     
                     <StackPanel Margin="5,8,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="RadioTrimSafe" Content="{lex:Loc VideoTrimModeSafe}" Margin="3,0,0,0" Checked="RadioTrimSafe_OnCheckedStateChanged" Unchecked="RadioTrimSafe_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <RadioButton x:Name="RadioTrimExact" Content="{lex:Loc VideoTrimModeExact}" IsChecked="True" Margin="3,0,0,0" Checked="RadioTrimExact_OnCheckedStateChanged" Unchecked="RadioTrimExact_OnCheckedStateChanged" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <StackPanel Orientation="Horizontal">                           
+                            <RadioButton x:Name="RadioTrimSafe" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeSafe}"                                        
+                                         Margin="3,0,0,0"  BorderBrush="{DynamicResource AppElementBorder}" 
+                                         Foreground="{DynamicResource AppText}" />
+                            <RadioButton x:Name="RadioTrimExact" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeExact}"
+                                         IsChecked="{Binding IsExactTrimMode}"
+                                         Margin="3,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                             <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" 

@@ -53,6 +53,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private double _numEndSecond = 0;
         private TimeSpan vodLength;
         private string _vodlengthStr;
+        private bool _isExactTrimMode = true;
 
         public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = new();
         public long currentVideoId;
@@ -102,10 +103,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             }
         }
         public string VodLengthStr { get => _vodlengthStr; set => SetProperty(ref _vodlengthStr, value); }
-
         protected TimeSpan StartTime => new TimeSpan((int)NumStartHour, (int)NumStartMinute, (int)NumStartSecond);
         protected TimeSpan EndTime => new TimeSpan((int)NumEndHour, (int)NumEndMinute, (int)NumEndSecond);
-
+        public bool IsExactTrimMode { get => _isExactTrimMode; set => SetProperty(ref _isExactTrimMode, value); }
 
         private async Task SelectChatInfo()
         {
@@ -319,12 +319,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 TempFolder = Settings.Default.TempPath
             };
 
-            //TODO 
-            //if (RadioTrimSafe.IsChecked == true)
-            //    options.TrimMode = VideoTrimMode.Safe;
-            //else if (RadioTrimExact.IsChecked == true)
-            //    options.TrimMode = VideoTrimMode.Exact;
-
+            options.TrimMode = IsExactTrimMode ? VideoTrimMode.Exact : VideoTrimMode.Safe;
             return options;
         }
 
@@ -450,6 +445,10 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             GC.Collect();
         }
 
+        /// <summary>
+        /// TODO 考虑取消默认的前后2min的自动切片
+        /// </summary>
+        /// <param name="param"></param>
         private async void DownloadClip(object param)
         {
             VodCommentData d = param as VodCommentData;
@@ -513,6 +512,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             GC.Collect();
         }
 
+        /// <summary>
+        /// Consider default EnqueueDownload
+        /// </summary>
         private void EnququeDownload()
         {
             if (ValidateInputs())

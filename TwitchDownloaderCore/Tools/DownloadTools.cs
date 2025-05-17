@@ -34,7 +34,8 @@ namespace TwitchDownloaderCore.Tools
 
             var cancellationToken = cancellationTokenSource?.Token ?? CancellationToken.None;
 
-            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            using var response = await httpClient.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             var fileMode = FileMode.Create;
