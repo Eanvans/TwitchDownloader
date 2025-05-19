@@ -16,12 +16,11 @@ namespace TwitchDownloaderCore.Services
         /// IQR = Q3 - Q1 
         /// highlight time is time interval about Q3 + 1.5*IQR 
         /// </summary>
-        public static List<VodCommentData> FindHotCommentsTimeline(ChatRoot root, TimeSpan? interval = null)
+        public static List<VodCommentData> FindHotCommentsTimelineIQR(ChatRoot root,
+            TimeSpan? interval = null)
         {
             if (interval == null)
                 interval = DEFAULT_TIME_INTERVAL;
-
-            interval = TimeSpan.FromMinutes(1);
 
             // 分组并计数
             var timelineData = root.comments
@@ -89,6 +88,207 @@ namespace TwitchDownloaderCore.Services
 
             rst = rst.OrderByDescending(s => s.CommentsCount).ToList();
             return rst;
+        }
+
+        /// <summary>
+        /// 使用滑动滤波的方式过滤峰值
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static List<VodCommentData> FindHotCommentsIntervalSlidingFilter(ChatRoot root, TimeSpan? interval = null)
+        {
+            if (interval == null)
+                interval = DEFAULT_TIME_INTERVAL;
+
+            int commLen = root.comments.Count;
+
+            var t = root.comments.Select(s => s.content_offset_seconds).ToList();
+            int dt = 5; // 5s
+
+            // 计算 T 的最大值
+            double tStart = t.FirstOrDefault();
+            double tEnd = t.LastOrDefault();
+            double maxTime = tEnd - tStart + dt;
+
+            // 构建 T 并初始化 count 数组
+            int tLength = (int)(maxTime / dt) + 1; // 包含最后一个完整区间
+            double[] T = new double[tLength];
+            double[] count = new double[tLength];
+
+            for (int i = 0; i < tLength; i++)
+            {
+                T[i] = i * dt;
+            }
+
+            // 分配计数
+            for (int i = 0; i < t.Count; i++)
+            {
+                double timeOffset = t[i] - tStart;
+                int k = (int)Math.Floor(timeOffset / dt);
+                if (k >= 0 && k < tLength)
+                {
+                    count[k]++;
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: time value {t[i]} is out of T range.");
+                }
+            }
+
+            // 第一步：计算窗口长度
+            var tWindowLength = (int)(10 * 60) / dt;
+            // 第二步：调用 MeanFilter（需要前面定义的函数）
+            double[] filteredCount = AlgoService.MeanFilter(count, tWindowLength + 1);
+            // 第三步：对结果进行缩放
+            double scale = tWindowLength + 1;
+            double[] count1 = new double[filteredCount.Length];
+            for (int i = 0; i < filteredCount.Length; i++)
+            {
+                count1[i] = filteredCount[i] * scale;
+            }
+
+            // 第四步：截取 T 中间部分：T1 = T(1 + WL/2 : end - WL/2)
+            int wl = tWindowLength;
+            int startIdx = (int)(wl / 2.0); // MATLAB 是从 1 开始索引，所以这里是 1 + wl/2 - 1
+            int endIdx = T.Length - (int)(wl / 2.0) - 1;
+
+            int resultLength = endIdx - startIdx + 1;
+            double[] T1 = new double[resultLength];
+            Array.Copy(T, startIdx, T1, 0, resultLength);
+
+            DetectPeaks(count1, tWindowLength, out List<int> peakIndex, out List<double> peak);
+
+            FilterTruePeaks(peakIndex, peak, tWindowLength, out List<int> peakIndexTrue, out List<double> peakTrue);
+
+            // 提取 peakT：从 T1 中取出对应索引的时间值
+            List<double> peakT = new List<double>();
+            foreach (int index in peakIndexTrue)
+            {
+                if (index >= 0 && index < T1.Length)
+                {
+                    peakT.Add(T1[index]);
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: Index {index} out of range for T1.");
+                }
+            }
+            // peakTrue 是峰值
+
+            // 综合结果
+            var timeLineOffsets = peakT
+               .Select(s => TimeSpan.FromSeconds((int)s))
+               .ToList();
+
+            return new();
+        }
+
+        public static void DetectPeaks(double[] count1, int tWindowLength, out List<int> peakIndex, out List<double> peak)
+        {
+            // 计算阈值：1.3 * mean(count1)
+            double sum = 0;
+            foreach (var val in count1)
+            {
+                sum += val;
+            }
+            double meanVal = sum / count1.Length;
+            double thr = 1.3 * meanVal;
+
+            peakIndex = new List<int>();
+            peak = new List<double>();
+
+            for (int i = 0; i <= count1.Length - tWindowLength - 1; i++)
+            {
+                // 提取窗口数据
+                double[] tmpData = new double[tWindowLength + 1];
+                Array.Copy(count1, i, tmpData, 0, tWindowLength + 1);
+
+                // 找最大值
+                double maxVal = double.MinValue;
+                int maxIdxInWindow = -1;
+                for (int j = 0; j < tmpData.Length; j++)
+                {
+                    if (tmpData[j] > maxVal)
+                    {
+                        maxVal = tmpData[j];
+                        maxIdxInWindow = j;
+                    }
+                }
+
+                // 跳过未超过阈值的情况
+                if (maxVal < thr)
+                    continue;
+
+                // 排除窗口边缘的极值点
+                if (maxIdxInWindow == 0 || maxIdxInWindow == tmpData.Length - 1)
+                    continue;
+
+                // 全局索引
+                int globalIndex = i + maxIdxInWindow;
+
+                // 判断是否已经记录了这个峰值
+                if (peakIndex.Count == 0)
+                {
+                    peakIndex.Add(globalIndex);
+                    peak.Add(maxVal);
+                }
+                else if (globalIndex == peakIndex[peakIndex.Count - 1])
+                {
+                    continue; // 避免重复添加
+                }
+                else
+                {
+                    peakIndex.Add(globalIndex);
+                    peak.Add(maxVal);
+                }
+            }
+        }
+
+        public static void FilterTruePeaks(
+        List<int> peakIndex,
+        List<double> peak,
+        int tWindowLength,
+        out List<int> peakIndexTrue,
+        out List<double> peakTrue)
+        {
+            peakIndexTrue = new List<int>();
+            peakTrue = new List<double>();
+
+            for (int i = 0; i < peak.Count; i++)
+            {
+                // 创建临时列表并删除第 i 个元素
+                List<int> peakIndexTmp = new List<int>(peakIndex);
+                List<double> peakTmp = new List<double>(peak);
+
+                peakIndexTmp.RemoveAt(i);
+                peakTmp.RemoveAt(i);
+
+                int nowIndex = peakIndex[i];
+                double nowPeak = peak[i];
+
+                bool isTrue = true;
+
+                for (int j = 0; j < peakTmp.Count; j++)
+                {
+                    int distance = Math.Abs(peakIndexTmp[j] - nowIndex);
+
+                    if (distance > tWindowLength)
+                        continue;
+
+                    if (peakTmp[j] > nowPeak)
+                    {
+                        isTrue = false;
+                        break;
+                    }
+                }
+
+                if (isTrue)
+                {
+                    peakIndexTrue.Add(nowIndex);
+                    peakTrue.Add(nowPeak);
+                }
+            }
         }
     }
 }

@@ -17,7 +17,7 @@
       xmlns:vm="clr-namespace:TwitchDownloaderWPF.Views.ViewModels"
       x:Class="TwitchDownloaderWPF.PageVodDownload"
       mc:Ignorable="d"
-      d:DesignHeight="900" d:DesignWidth="800"
+      d:DesignHeight="900" d:DesignWidth="1100"
       Title="PageVodDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
     <Page.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -26,234 +26,233 @@
     </Page.Resources>
     <Page.DataContext>
         <vm:VodDownloadVM></vm:VodDownloadVM>
-    </Page.DataContext>    
-    <Grid Background="{DynamicResource AppBackground}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="28"/>
-        </Grid.RowDefinitions>
-        
-        <!-- LEFT -->
-        <StackPanel Margin="0,21,0,0" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
-            <Border BorderBrush="{DynamicResource AppElementBorder}" BorderThickness="1">
-                <Image Stretch="Fill" StretchDirection="Both" Source="{Binding ImgThumb}" MinHeight="100"/>
-            </Border>
-            <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="{lex:Loc Streamer}" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3" Text="{Binding TextStreamer}" Foreground="{DynamicResource AppText}" />
+    </Page.DataContext>
+    <Grid Background="{DynamicResource AppBackground}">        
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="28"/>
+            </Grid.RowDefinitions>
+
+            <!-- LEFT -->
+            <StackPanel Margin="0,21,0,0" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
+                <Border BorderBrush="{DynamicResource AppElementBorder}" BorderThickness="1">
+                    <Image Stretch="Fill" StretchDirection="Both" Source="{Binding ImgThumb}" MinHeight="100"/>
+                </Border>
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,3,3,3" Text="{lex:Loc Streamer}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Margin="3" Text="{Binding TextStreamer}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoCreatedAt}" Foreground="{DynamicResource AppText}" />
+                    <TextBlock Margin="3" Text="{Binding TextCreatedAt}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoTitle}" Foreground="{DynamicResource AppText}" />
+                </WrapPanel>
+                <emoji:TextBlock TextWrapping="Wrap" Text="{Binding TextTitle}" Foreground="{DynamicResource AppText}" />
+            </StackPanel>
+
+            <!-- MIDDLE -->
+            <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
+                <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" 
+                  Text="{Binding LinkUrl}"
+                  Background="{DynamicResource AppElementBackground}" 
+                  BorderBrush="{DynamicResource AppElementBorder}" 
+                  Foreground="{DynamicResource AppText}" />
+                <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}"                    
+                 Background="{DynamicResource ActionButtonBackground}" 
+                 Foreground="{DynamicResource ActionButtonText}" 
+                 BorderBrush="{DynamicResource ActionButtonBorder}"
+                 Command="{Binding OnGetVideoInfo}"/>
+                <!--<CheckBox Margin="5 5 0 0" Content="Analyze Chat Data" IsChecked="{Binding IsAnalyzeComments}"/>-->
             </WrapPanel>
-            <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoCreatedAt}" Foreground="{DynamicResource AppText}" />
-                <TextBlock Margin="3" Text="{Binding TextCreatedAt}" Foreground="{DynamicResource AppText}" />
-            </WrapPanel>
-            <WrapPanel Orientation="Horizontal">
-                <TextBlock Margin="0,3,3,3" Text="{lex:Loc VideoTitle}" Foreground="{DynamicResource AppText}" />
-            </WrapPanel>
-            <emoji:TextBlock TextWrapping="Wrap" Text="{Binding TextTitle}" Foreground="{DynamicResource AppText}" />
-        </StackPanel>
-        
-        <!-- MIDDLE -->
-        <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
-            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" 
-                     Text="{Binding LinkUrl}"
-                     Background="{DynamicResource AppElementBackground}" 
-                     BorderBrush="{DynamicResource AppElementBorder}" 
-                     Foreground="{DynamicResource AppText}" />
-            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}"                    
-                    Background="{DynamicResource ActionButtonBackground}" 
-                    Foreground="{DynamicResource ActionButtonText}" 
-                    BorderBrush="{DynamicResource ActionButtonBorder}"
-                    Command="{Binding OnGetVideoInfo}"/>
-            <CheckBox Margin="5 5 0 0" Content="Analyze Chat Data" IsChecked="{Binding IsAnalyzeComments}"/>
-        </WrapPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <StackPanel HorizontalAlignment="Left">
-                    <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
-                    <TextBlock Text="{lex:Loc Quality}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
-                    <TextBlock HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}">
-                        <Run Text="{lex:Loc VideoTrimMode}"/>
-                            <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>
-                                <Run Text="{lex:Loc VideoTrimModeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
-                    <TextBlock Text="{lex:Loc TrimVideo}" HorizontalAlignment="Right" Margin="0,10,0,0" Foreground="{DynamicResource AppText}" />
-                    <TextBlock Text="{lex:Loc VideoDownloadThreads}" HorizontalAlignment="Right" Margin="0,46,0,0" Foreground="{DynamicResource AppText}" />
-                    <TextBlock HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}">
-                        <Run Text="{lex:Loc Oauth}"/>
-                        <Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}">
-                            <Hyperlink.ToolTip>
-                                <Run Text="{lex:Loc OauthTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:
-                    </TextBlock>
-                </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" >
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Left">
+                        <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />
+                        <TextBlock Text="{lex:Loc Quality}" HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}" />
+                        <TextBlock HorizontalAlignment="Right" Margin="0,15,0,0" Foreground="{DynamicResource AppText}">
+                     <Run Text="{lex:Loc VideoTrimMode}"/>
+                         <Hyperlink ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip>
+                             <Run Text="{lex:Loc VideoTrimModeTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:</TextBlock>
+                        <TextBlock Text="{lex:Loc TrimVideo}" HorizontalAlignment="Right" Margin="0,10,0,0" Foreground="{DynamicResource AppText}" />
+                        <TextBlock Text="{lex:Loc VideoDownloadThreads}" HorizontalAlignment="Right" Margin="0,46,0,0" Foreground="{DynamicResource AppText}" />
+                        <TextBlock HorizontalAlignment="Right" Margin="0,21,0,0" Foreground="{DynamicResource AppText}">
+                     <Run Text="{lex:Loc Oauth}"/>
+                     <Hyperlink NavigateUri="https://www.youtube.com/watch?v=1MBsUoFGuls" RequestNavigate="Hyperlink_RequestNavigate" ToolTipService.ShowDuration="30000" Foreground="{DynamicResource AppHyperlink}">
+                         <Hyperlink.ToolTip>
+                             <Run Text="{lex:Loc OauthTooltip}"/></Hyperlink.ToolTip>(?)</Hyperlink>:
+                        </TextBlock>
+                    </StackPanel>
 
-                <StackPanel>
-                    <TextBlock x:Name="labelLength" 
-                               Text="{Binding VodLengthStr}" Margin="5,0,0,0"
-                               Foreground="{DynamicResource AppText}" />
-                    
-                    <ComboBox Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" 
-                              ItemsSource="{Binding ComboQuality}"
-                              SelectedIndex="{Binding ComboQualityIndex}"
-                              BorderBrush="{DynamicResource AppElementBorder}" 
-                              Foreground="{DynamicResource AppText}"/>
-                    
-                    <StackPanel Margin="5,8,0,0">
-                        <StackPanel Orientation="Horizontal">                           
-                            <RadioButton x:Name="RadioTrimSafe" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeSafe}"                                        
-                                         Margin="3,0,0,0"  BorderBrush="{DynamicResource AppElementBorder}" 
-                                         Foreground="{DynamicResource AppText}" />
-                            <RadioButton x:Name="RadioTrimExact" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeExact}"
-                                         IsChecked="{Binding IsExactTrimMode}"
-                                         Margin="3,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                                      IsChecked="{Binding IsCheckStart}"
-                                      BorderBrush="{DynamicResource AppElementBorder}"/>
-                            <TextBlock Margin="2,0,0,0" Text="{lex:Loc TrimStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numStartHour" 
-                                              Value="{Binding NumStartHour}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartMinute" 
-                                              Value="{Binding NumStartMinute}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartSecond" 
-                                              Value="{Binding NumStartSecond}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                                      IsChecked="{Binding IsCheckEnd}"                                      
-                                      BorderBrush="{DynamicResource AppElementBorder}"/>
-                            <TextBlock Text="{lex:Loc TrimEnd}" VerticalAlignment="Center" Margin="2,0,5,0" Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numEndHour" 
-                                              Value="{Binding NumEndHour}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndMinute" 
-                                              Value="{Binding NumEndMinute}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                            <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndSecond" 
-                                              Value="{Binding NumEndSecond}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                        </StackPanel>
+                    <StackPanel>
+                        <TextBlock x:Name="labelLength" 
+                            Text="{Binding VodLengthStr}" Margin="5,0,0,0"
+                            Foreground="{DynamicResource AppText}" />
 
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Maximum="20" 
-                                              HorizontalAlignment="Left" 
-                                              Value="{Binding NumDownloadThreads}"
-                                              Background="{DynamicResource AppElementBackground}" 
-                                              BorderBrush="{DynamicResource AppElementBorder}" 
-                                              Foreground="{DynamicResource AppText}" />
-                        </StackPanel>
+                        <ComboBox Margin="5,10,0,0" Background="{DynamicResource AppElementBackground}" 
+                           ItemsSource="{Binding ComboQuality}"
+                           SelectedIndex="{Binding ComboQualityIndex}"
+                           BorderBrush="{DynamicResource AppElementBorder}" 
+                           Foreground="{DynamicResource AppText}"/>
 
-                        <TextBox x:Name="TextOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <StackPanel Margin="5,8,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="RadioTrimSafe" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeSafe}"                                        
+                                      Margin="3,0,0,0"  BorderBrush="{DynamicResource AppElementBorder}" 
+                                      Foreground="{DynamicResource AppText}" />
+                                <RadioButton x:Name="RadioTrimExact" GroupName="trimGroup" Content="{lex:Loc VideoTrimModeExact}"
+                                      IsChecked="{Binding IsExactTrimMode}"
+                                      Margin="3,0,0,0" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <CheckBox x:Name="checkStart" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                   IsChecked="{Binding IsCheckStart}"
+                                   BorderBrush="{DynamicResource AppElementBorder}"/>
+                                <TextBlock Margin="2,0,0,0" Text="{lex:Loc TrimStart}" VerticalAlignment="Center" Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numStartHour" 
+                                           Value="{Binding NumStartHour}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartMinute" 
+                                           Value="{Binding NumStartMinute}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numStartSecond" 
+                                           Value="{Binding NumStartSecond}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <CheckBox x:Name="checkEnd" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                   IsChecked="{Binding IsCheckEnd}"                                      
+                                   BorderBrush="{DynamicResource AppElementBorder}"/>
+                                <TextBlock Text="{lex:Loc TrimEnd}" VerticalAlignment="Center" Margin="2,0,5,0" Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="48" x:Name="numEndHour" 
+                                           Value="{Binding NumEndHour}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndMinute" 
+                                           Value="{Binding NumEndMinute}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                                <hc:NumericUpDown Margin="3,-1,0,0" Minimum="0" Maximum="59" x:Name="numEndSecond" 
+                                           Value="{Binding NumEndSecond}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <hc:NumericUpDown Margin="0,5,0,0" Minimum="1" Maximum="20" 
+                                           HorizontalAlignment="Left" 
+                                           Value="{Binding NumDownloadThreads}"
+                                           Background="{DynamicResource AppElementBackground}" 
+                                           BorderBrush="{DynamicResource AppElementBorder}" 
+                                           Foreground="{DynamicResource AppText}" />
+                            </StackPanel>
+
+                            <TextBox x:Name="TextOauth" Margin="0,8,3,3" MinWidth="200" MaxWidth="400" TextChanged="TextOauth_TextChanged" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
+                    <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" 
+                             Command="{Binding OnDownLoad}" Background="{DynamicResource ActionButtonBackground}" 
+                             Foreground="{DynamicResource ActionButtonText}" 
+                             BorderBrush="{DynamicResource ActionButtonBorder}" >
+                        <hc:SplitButton.DropDownContent>
+                            <StackPanel>
+                                <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" 
+                                   Command="{Binding OnEnqueueDownload}"/>
+                            </StackPanel>
+                        </hc:SplitButton.DropDownContent>
+                    </hc:SplitButton>
+                    <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" 
+                     Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" 
+                     Foreground="{DynamicResource ActionButtonText}" 
+                     BorderBrush="{DynamicResource ActionButtonBorder}"/>
+                </StackPanel>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom">
-                <hc:SplitButton x:Name="SplitBtnDownload" Height="40" Width="120" Content="{lex:Loc Download}" 
-                                Command="{Binding OnDownLoad}" Background="{DynamicResource ActionButtonBackground}" 
-                                Foreground="{DynamicResource ActionButtonText}" 
-                                BorderBrush="{DynamicResource ActionButtonBorder}" >
-                    <hc:SplitButton.DropDownContent>
-                        <StackPanel>
-                            <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" 
-                                      Command="{Binding OnEnqueueDownload}"/>
-                        </StackPanel>
-                    </hc:SplitButton.DropDownContent>
-                </hc:SplitButton>
-                <Button x:Name="BtnCancel" Height="40" MinWidth="120" Margin="0,6,0,0" Content="{lex:Loc TaskCancel}" 
-                        Visibility="Collapsed" Background="{DynamicResource ActionButtonBackground}" 
-                        Foreground="{DynamicResource ActionButtonText}" 
-                        BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            <!-- RIGHT -->
+            <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <!--<Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>-->
+                    <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
-       
-        <!-- RIGHT -->
-        <StackPanel Grid.Column="4" Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Right">
-            <StackPanel Orientation="Horizontal">
-                <Button fa:Awesome.Content="Solid_DollarSign" x:Name="btnDonate" ToolTip="{lex:Loc DonateTooltip}" Height="26" Width="40" Click="btnDonate_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
-                <Button fa:Awesome.Content="Solid_Cog" x:Name="btnSettings" Height="26" Width="40" Margin="4,0,0,0" Click="btnSettings_Click" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}"/>
+
+            <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
+                <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}" />
+                <RichTextBox Margin="0,5" IsReadOnly="True" x:Name="textLog" Height="230" 
+                      Background="{DynamicResource AppElementBackground}" 
+                      BorderBrush="{DynamicResource AppElementBorder}" 
+                      Foreground="{DynamicResource AppText}">
+                    <RichTextBox.Resources>
+                        <Style TargetType="{x:Type Paragraph}">
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                    </RichTextBox.Resources>
+                </RichTextBox>
             </StackPanel>
-        </StackPanel>
-        
-        <StackPanel Grid.Column="4" Grid.Row="2" Grid.RowSpan="2">
-            <TextBlock Text="{lex:Loc LogHeader}" Foreground="{DynamicResource AppText}" />
-            <RichTextBox Margin="0,5" IsReadOnly="True" x:Name="textLog" Height="230" 
-                         Background="{DynamicResource AppElementBackground}" 
-                         BorderBrush="{DynamicResource AppElementBorder}" 
-                         Foreground="{DynamicResource AppText}">
-                <RichTextBox.Resources>
-                    <Style TargetType="{x:Type Paragraph}">
-                        <Setter Property="Margin" Value="0" />
-                    </Style>
-                </RichTextBox.Resources>
-            </RichTextBox>
-        </StackPanel>
 
-        <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <!--<ColumnDefinition Width="1*"/>-->
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
 
-            <DataGrid Name="commGrid" Grid.Column="0" ItemsSource="{Binding VodCommentsData}" AutoGenerateColumns="False"
-                      RowHeight="30" CanUserSortColumns="False" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="TimeInterval" Binding="{Binding TimeInterval}" Width="1*" />
-                    <DataGridTextColumn Header="Comments count" Binding="{Binding CommentsCount}" Width="1*"/>
-                    <DataGridTextColumn Header="Offset time" Binding="{Binding OffsetSeconds}" Width="1*"/>
-                    <DataGridTextColumn Header="Offset Interval" Binding="{Binding OffsetInterval}" Width="1*"/>
-                    <DataGridTemplateColumn Header="Options">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Download Clip"
-                                        Command="{Binding DataContext.OnDownloadClip, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+                <DataGrid Name="commGrid" Grid.Column="0" ItemsSource="{Binding VodCommentsData}" AutoGenerateColumns="False"
+                   RowHeight="30" CanUserSortColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="TimeInterval" Binding="{Binding TimeInterval}" Width="1*" />
+                        <DataGridTextColumn Header="Comments count" Binding="{Binding CommentsCount}" Width="1*"/>
+                        <DataGridTextColumn Header="Offset time" Binding="{Binding OffsetSeconds}" Width="1*"/>
+                        <DataGridTextColumn Header="Offset Interval" Binding="{Binding OffsetInterval}" Width="1*"/>
+                        <DataGridTemplateColumn Header="Options">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Download Clip"
+                                     Command="{Binding DataContext.OnDownloadClip, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                     CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+
+            <!--STATUS BAR-->
+            <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" 
+                Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
+                <StatusBarItem Padding="10,1,0,1">
+                    <TextBlock Text="{Binding StatusMessage}" x:Name="statusMessage"
+                        FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
+                </StatusBarItem>
+                <StatusBarItem Padding="10,1,10,1" HorizontalAlignment="Right">
+                    <ProgressBar Width="200" Height="14" Value="{Binding StatusProgressBarValue}" 
+                          Background="{DynamicResource StatusBarElement}" 
+                          Foreground="{DynamicResource ProgressBarForeground}"/>
+                </StatusBarItem>
+            </StatusBar>
         </Grid>
-        
-        
-        <!--STATUS BAR-->
-        <StatusBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" 
-                   Background="{DynamicResource StatusBarBackground}" BorderBrush="{DynamicResource StatusBarBorder}">
-            <StatusBarItem Padding="10,1,0,1">
-                <TextBlock Text="{Binding StatusMessage}" x:Name="statusMessage"
-                           FontWeight="Bold" Foreground="{DynamicResource StatusBarText}"/>
-            </StatusBarItem>
-            <StatusBarItem Padding="10,1,10,1" HorizontalAlignment="Right">
-                <ProgressBar Width="200" Height="14" Value="{Binding StatusProgressBarValue}" 
-                             Background="{DynamicResource StatusBarElement}" 
-                             Foreground="{DynamicResource ProgressBarForeground}"/>
-            </StatusBarItem>
-        </StatusBar>
-    </Grid>
 </Page>

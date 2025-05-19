@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveCharts;
+using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,7 +28,7 @@ using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.Views.ViewModels
 {
-    public class VodDownloadVM : ObservableObject
+    public partial class VodDownloadVM : ObservableObject
     {
         private bool _idle = true;
         private bool _IsAnalyzeComments = false;
@@ -72,6 +74,11 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public ICommand OnEnqueueDownload => new RelayCommand(EnququeDownload);
         public ICommand OnDownloadClip => new RelayCommand<object>(DownloadClip);
 
+        [ObservableProperty]
+        public SeriesCollection seriesCollection;
+        [ObservableProperty]
+        public ObservableCollection<string> labels;
+
         public ObservableCollection<VodCommentData> VodCommentsData { get => _vodCommentsData; set => SetProperty(ref _vodCommentsData, value); }
         public bool IsAnalyzeComments { get => _IsAnalyzeComments; set => SetProperty(ref _IsAnalyzeComments, value); }
         public string LinkUrl { get => _linkUrl; set => SetProperty(ref _linkUrl, value); }
@@ -107,7 +114,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         protected TimeSpan EndTime => new TimeSpan((int)NumEndHour, (int)NumEndMinute, (int)NumEndSecond);
         public bool IsExactTrimMode { get => _isExactTrimMode; set => SetProperty(ref _isExactTrimMode, value); }
 
-        private async Task SelectChatInfo()
+        public Func<double, string> YFormatter => value => value.ToString("C");
+
+        private async Task AnalyzeCommentsInfo()
         {
             // file not been saved
             ChatDownloadOptions downloadOptions = GetChatOptions("");
@@ -121,9 +130,12 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             {
                 var chatRoot = await currentDownload.DownloadChat(c.Token);
 
-                var rst = DataAnalyzeService.FindHotCommentsTimeline(chatRoot);
-
+                var rst = DataAnalyzeService.FindHotCommentsTimelineIQR(chatRoot);
+                var rst2 = DataAnalyzeService.FindHotCommentsIntervalSlidingFilter(chatRoot);
                 VodCommentsData = new(rst);
+
+                //SetLineSeriseData(rst.Select(s => s.OffsetSeconds.ToString()).ToList(),
+                //    rst.Select(s => s.CommentsCount).ToList());
 
                 downloadProgress.SetStatus(Translations.Strings.StatusDone);
             }
@@ -136,6 +148,24 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 downloadProgress.SetStatus(Translations.Strings.StatusError);
             }
             c.Dispose();
+        }
+
+        private void SetLineSeriseData(List<string> labels, List<int> values)
+        {
+            var ls = new LineSeries
+            {
+                Title = "Comments group by seconds",
+                Values = new ChartValues<int>(values),
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 10
+            };
+
+            this.SeriesCollection = new SeriesCollection
+            {
+                ls,
+            };
+
+            this.Labels = new(labels);
         }
 
         private async Task GetVideoInfo()
@@ -236,12 +266,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 game = taskVideoInfo.Result.data.video.game?.displayName ?? Translations.Strings.UnknownGame;
 
                 UpdateVideoSizeEstimates();
-
-                //SetEnabled(true);
             }
             catch (Exception ex)
             {
-                //btnGetInfo.IsEnabled = true;
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (Settings.Default.VerboseErrors)
@@ -363,12 +390,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         {
             _idle = false;
             await GetVideoInfo();
-
-            if (IsAnalyzeComments)
-            {
-                await SelectChatInfo();
-            }
-
+            await AnalyzeCommentsInfo();
             _idle = true;
         }
 
@@ -507,8 +529,6 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             _idle = true;
             downloadProgress.ReportProgress(0);
             _cancellationTokenSource.Dispose();
-            //UpdateActionButtons(false);
-
             GC.Collect();
         }
 
