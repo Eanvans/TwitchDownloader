@@ -99,62 +99,61 @@ namespace TwitchDownloaderCore.Services
             if (interval == null)
                 interval = DEFAULT_TIME_INTERVAL;
 
-            int commLen = root.comments.Count;
-            var t = root.comments.Select(s => s.content_offset_seconds).ToList();
-            int dt = 5; // 5s
+            int commentsCount = root.comments.Count;
+            var commentsSecList = root.comments.Select(s => s.content_offset_seconds).ToList();
+            int secondsDt = 5; // 5s
 
             // 计算 T 的最大值
-            double tStart = t.FirstOrDefault();
-            double tEnd = t.LastOrDefault();
-            double maxTime = tEnd - tStart + dt;
+            double startSecond = commentsSecList.FirstOrDefault();
+            double endSecond = commentsSecList.LastOrDefault();
+            double maxTime = endSecond - startSecond + secondsDt;
 
-            // 构建 T 并初始化 count 数组
-            int tLength = (int)(maxTime / dt) + 1; // 包含最后一个完整区间
-            double[] T = new double[tLength];
-            double[] count = new double[tLength];
-
-            for (int i = 0; i < tLength; i++)
+            // 构建 T 并初始化 区间大小
+            int intervalLen = (int)(maxTime / secondsDt) + 1;
+            double[] T = new double[intervalLen];
+            double[] commentCountByDt = new double[intervalLen];
+            for (int i = 0; i < intervalLen; i++)
             {
-                T[i] = i * dt;
+                T[i] = i * secondsDt;
             }
 
-            // 分配计数
-            for (int i = 0; i < t.Count; i++)
+            // 分配数据到区间内
+            for (int i = 0; i < commentsSecList.Count; i++)
             {
-                double timeOffset = t[i] - tStart;
-                int k = (int)Math.Floor(timeOffset / dt);
-                if (k >= 0 && k < tLength)
+                double timeOffset = commentsSecList[i] - startSecond;
+                int k = (int)Math.Floor(timeOffset / secondsDt);
+                if (k >= 0 && k < intervalLen)
                 {
-                    count[k]++;
+                    commentCountByDt[k]++;
                 }
                 else
                 {
-                    Console.WriteLine($"Warning: time value {t[i]} is out of T range.");
+                    Console.WriteLine($"Warning: time value {commentsSecList[i]} is out of T range.");
                 }
             }
 
-            // 第一步：计算窗口长度
-            var tWindowLength = (int)(10 * 60) / dt;
-            // 第二步：调用 MeanFilter（需要前面定义的函数）
-            double[] filteredCount = AlgoService.MeanFilter(count, tWindowLength + 1);
+            // 第一步：计算窗口长度 
+            // default time is 10min
+            var tWindowLength = (int)(10 * 60) / secondsDt;
+            // 第二步：调用 MeanFilter（需要前面定义的函数）平滑窗口
+            double[] filteredCount = AlgoService.MeanFilter(commentCountByDt, tWindowLength + 1);
             // 第三步：对结果进行缩放
             double scale = tWindowLength + 1;
-            double[] count1 = new double[filteredCount.Length];
+            double[] scaledFilteredCount = new double[filteredCount.Length];
             for (int i = 0; i < filteredCount.Length; i++)
             {
-                count1[i] = filteredCount[i] * scale;
+                scaledFilteredCount[i] = filteredCount[i] * scale;
             }
 
             // 第四步：截取 T 中间部分：T1 = T(1 + WL/2 : end - WL/2)
-            int wl = tWindowLength;
-            int startIdx = (int)(wl / 2.0); // MATLAB 是从 1 开始索引，所以这里是 1 + wl/2 - 1
-            int endIdx = T.Length - (int)(wl / 2.0) - 1;
+            int startIdx = (int)(tWindowLength / 2.0); // MATLAB 是从 1 开始索引，所以这里是 1 + wl/2 - 1
+            int endIdx = T.Length - (int)(tWindowLength / 2.0) - 1;
 
             int resultLength = endIdx - startIdx + 1;
             double[] T1 = new double[resultLength];
             Array.Copy(T, startIdx, T1, 0, resultLength);
 
-            DetectPeaks(count1, tWindowLength, out List<int> peakIndex, out List<double> peak, out double meanVal);
+            DetectPeaks(scaledFilteredCount, tWindowLength, out List<int> peakIndex, out List<double> peak, out double meanVal);
 
             // peakTrue 是峰值
             FilterTruePeaks(peakIndex, peak, tWindowLength, out List<int> peakIndexTrue, out List<double> peakTrue);
