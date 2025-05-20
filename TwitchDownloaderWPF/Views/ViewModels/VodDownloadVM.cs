@@ -132,7 +132,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
 
                 var rst = DataAnalyzeService.FindHotCommentsTimelineIQR(chatRoot);
                 var rst2 = DataAnalyzeService.FindHotCommentsIntervalSlidingFilter(chatRoot);
-                VodCommentsData = new(rst);
+                VodCommentsData = new(rst2);
 
                 //SetLineSeriseData(rst.Select(s => s.OffsetSeconds.ToString()).ToList(),
                 //    rst.Select(s => s.CommentsCount).ToList());

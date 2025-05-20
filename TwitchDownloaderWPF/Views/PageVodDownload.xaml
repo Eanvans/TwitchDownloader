@@ -17,7 +17,7 @@
       xmlns:vm="clr-namespace:TwitchDownloaderWPF.Views.ViewModels"
       x:Class="TwitchDownloaderWPF.PageVodDownload"
       mc:Ignorable="d"
-      d:DesignHeight="900" d:DesignWidth="1100"
+      d:DesignHeight="900" d:DesignWidth="800"
       Title="PageVodDownload" Initialized="Page_Initialized" Loaded="Page_Loaded">
     <Page.Resources>
         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -224,7 +224,7 @@
                    RowHeight="30" CanUserSortColumns="False" IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="TimeInterval" Binding="{Binding TimeInterval}" Width="1*" />
-                        <DataGridTextColumn Header="Comments count" Binding="{Binding CommentsCount}" Width="1*"/>
+                        <!--<DataGridTextColumn Header="Comments count" Binding="{Binding CommentsCount}" Width="1*"/>-->
                         <DataGridTextColumn Header="Offset time" Binding="{Binding OffsetSeconds}" Width="1*"/>
                         <DataGridTextColumn Header="Offset Interval" Binding="{Binding OffsetInterval}" Width="1*"/>
                         <DataGridTemplateColumn Header="Options">

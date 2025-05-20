@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TwitchDownloaderCore.Models;
@@ -69,7 +68,6 @@ namespace TwitchDownloaderCore.Services
                 .Where(s => s.Count > 3 * stat.Sigma)
                 .ToList();
 
-            var str = JsonConvert.SerializeObject(orderbyCount);
 
             var timeLineOffsets = selectedTimeline
                .Select(s => TimeSpan.FromSeconds(s.BeginOffset))
@@ -102,7 +100,6 @@ namespace TwitchDownloaderCore.Services
                 interval = DEFAULT_TIME_INTERVAL;
 
             int commLen = root.comments.Count;
-
             var t = root.comments.Select(s => s.content_offset_seconds).ToList();
             int dt = 5; // 5s
 
@@ -157,11 +154,12 @@ namespace TwitchDownloaderCore.Services
             double[] T1 = new double[resultLength];
             Array.Copy(T, startIdx, T1, 0, resultLength);
 
-            DetectPeaks(count1, tWindowLength, out List<int> peakIndex, out List<double> peak);
+            DetectPeaks(count1, tWindowLength, out List<int> peakIndex, out List<double> peak, out double meanVal);
 
+            // peakTrue 是峰值
             FilterTruePeaks(peakIndex, peak, tWindowLength, out List<int> peakIndexTrue, out List<double> peakTrue);
 
-            // 提取 peakT：从 T1 中取出对应索引的时间值
+            // 提取 peakT：从 T1 中取出对应索引的时间值 加上第一个值的second offset 才是准确的时间值
             List<double> peakT = new List<double>();
             foreach (int index in peakIndexTrue)
             {
@@ -174,17 +172,33 @@ namespace TwitchDownloaderCore.Services
                     Console.WriteLine($"Warning: Index {index} out of range for T1.");
                 }
             }
-            // peakTrue 是峰值
+
+            // 查找时间段
+            foreach (double p in peakTrue)
+            {
+
+            }
 
             // 综合结果
             var timeLineOffsets = peakT
                .Select(s => TimeSpan.FromSeconds((int)s))
                .ToList();
 
-            return new();
+            List<VodCommentData> rst = new();
+            foreach (var item in timeLineOffsets)
+            {
+                rst.Add(new VodCommentData()
+                {
+                    TimeInterval = item.ToString(@"hh\:mm\:ss"),
+                    OffsetInterval = item.ToString(@"hh\:mm\:ss")
+                });
+            }
+
+            return rst;
         }
 
-        public static void DetectPeaks(double[] count1, int tWindowLength, out List<int> peakIndex, out List<double> peak)
+        public static void DetectPeaks(double[] count1, int tWindowLength, out List<int> peakIndex, out List<double> peak,
+            out double meanVal)
         {
             // 计算阈值：1.3 * mean(count1)
             double sum = 0;
@@ -192,8 +206,8 @@ namespace TwitchDownloaderCore.Services
             {
                 sum += val;
             }
-            double meanVal = sum / count1.Length;
-            double thr = 1.3 * meanVal;
+            meanVal = sum / count1.Length;
+            double thr = 1.3 * meanVal;  //调整这个值来探测更多的峰值
 
             peakIndex = new List<int>();
             peak = new List<double>();
@@ -245,12 +259,8 @@ namespace TwitchDownloaderCore.Services
             }
         }
 
-        public static void FilterTruePeaks(
-        List<int> peakIndex,
-        List<double> peak,
-        int tWindowLength,
-        out List<int> peakIndexTrue,
-        out List<double> peakTrue)
+        public static void FilterTruePeaks(List<int> peakIndex, List<double> peak, int tWindowLength,
+        out List<int> peakIndexTrue, out List<double> peakTrue)
         {
             peakIndexTrue = new List<int>();
             peakTrue = new List<double>();
