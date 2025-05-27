@@ -7,16 +7,16 @@ namespace TwitchDownloaderCore.Models
     /// </summary>
     public class VodCommentStats
     {
-        private int min = 0;
-        private int max = 0;
+        private double min = 0;
+        private double max = 0;
         private double average = 0;
         private double sum = 0;
         private double sumOfSquares = 0;
         private double sigma = 0;
         private int count = 0;
 
-        public int Min { get => min; set => min = value; }
-        public int Max { get => max; set => max = value; }
+        public double Min { get => min; set => min = value; }
+        public double Max { get => max; set => max = value; }
         public double Average { get => average; set => average = value; }
         public double Sum { get => sum; set => sum = value; }
         public double SumOfSquares { get => sumOfSquares; set => sumOfSquares = value; }
@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.Models
 
         public void AddData(VodCommentData data)
         {
-            int value = data.CommentsCount;
+            double value = data.CommentsScore;
 
             if (Count == 0)
             {

@@ -55,7 +55,7 @@ namespace TwitchDownloaderCore.Services
                 stat.AddData(new VodCommentData()
                 {
                     TimeInterval = item.TimeSlot.ToShortDateString(),
-                    CommentsCount = item.Count,
+                    CommentsScore = item.Count,
                     OffsetSeconds = item.BeginOffset,
                 });
             }
@@ -79,12 +79,12 @@ namespace TwitchDownloaderCore.Services
                 rst.Add(new VodCommentData()
                 {
                     TimeInterval = item.TimeSlot.ToShortDateString(),
-                    CommentsCount = item.Count,
+                    CommentsScore = item.Count,
                     OffsetSeconds = item.BeginOffset,
                 });
             }
 
-            rst = rst.OrderByDescending(s => s.CommentsCount).ToList();
+            rst = rst.OrderByDescending(s => s.CommentsScore).ToList();
             return rst;
         }
 
@@ -159,37 +159,16 @@ namespace TwitchDownloaderCore.Services
             FilterTruePeaks(peakIndex, peak, tWindowLength, out List<int> peakIndexTrue, out List<double> peakTrue);
 
             // 提取 peakT：从 T1 中取出对应索引的时间值 加上第一个值的second offset 才是准确的时间值
-            List<double> peakT = new List<double>();
-            foreach (int index in peakIndexTrue)
-            {
-                if (index >= 0 && index < T1.Length)
-                {
-                    peakT.Add(T1[index]);
-                }
-                else
-                {
-                    Console.WriteLine($"Warning: Index {index} out of range for T1.");
-                }
-            }
-
-            // 查找时间段
-            foreach (double p in peakTrue)
-            {
-
-            }
-
-            // 综合结果
-            var timeLineOffsets = peakT
-               .Select(s => TimeSpan.FromSeconds((int)s))
-               .ToList();
-
             List<VodCommentData> rst = new();
-            foreach (var item in timeLineOffsets)
+            var offsetSec = commentsSecList.FirstOrDefault();
+            int peakI = 0;
+            foreach (int index in peakIndexTrue)
             {
                 rst.Add(new VodCommentData()
                 {
-                    TimeInterval = item.ToString(@"hh\:mm\:ss"),
-                    OffsetInterval = item.ToString(@"hh\:mm\:ss")
+                    TimeInterval = "7min",
+                    CommentsScore = peakTrue[peakI++],
+                    OffsetSeconds = T1[index] + offsetSec
                 });
             }
 

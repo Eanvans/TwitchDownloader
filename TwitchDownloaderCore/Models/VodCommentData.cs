@@ -6,8 +6,11 @@ namespace TwitchDownloaderCore.Models
     {
         private double _offsetSeconds;
 
+        /// <summary>
+        /// 时间间隔
+        /// </summary>
         public string TimeInterval { get; set; }
-        public int CommentsCount { get; set; }
+        public double CommentsScore { get; set; }
         public double OffsetSeconds
         {
             get => _offsetSeconds; set

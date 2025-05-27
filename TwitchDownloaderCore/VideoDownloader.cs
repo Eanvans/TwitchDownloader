@@ -63,7 +63,7 @@ namespace TwitchDownloaderCore
 
         private async Task DownloadAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
         {
-            await TwitchHelper.CleanupAbandonedVideoCaches(_cacheDir, downloadOptions.CacheCleanerCallback, _progress);
+            //await TwitchHelper.CleanupAbandonedVideoCaches(_cacheDir, downloadOptions.CacheCleanerCallback, _progress);
 
             _progress.SetStatus("Fetching Video Info [1/4]");
 

@@ -468,14 +468,14 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         }
 
         /// <summary>
-        /// TODO 考虑取消默认的前后2min的自动切片
+        /// TODO 考虑取消默认的前后3min的自动切片
         /// </summary>
         /// <param name="param"></param>
         private async void DownloadClip(object param)
         {
             VodCommentData d = param as VodCommentData;
-            TimeSpan st = TimeSpan.FromSeconds(d.OffsetSeconds - 120);
-            TimeSpan et = TimeSpan.FromSeconds(d.OffsetSeconds + 60 + 120);
+            TimeSpan st = TimeSpan.FromSeconds(d.OffsetSeconds - 60 * 3);
+            TimeSpan et = TimeSpan.FromSeconds(d.OffsetSeconds + 60 + 60 * 3);
 
             // offset to 120s start and 120s end
             System.Windows.Forms.SaveFileDialog saveFileDialog = new()
