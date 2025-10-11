@@ -40,25 +40,25 @@ namespace TwitchDownloaderWPF
             Main.Content = pageVodDownload;
         }
 
-        private void btnClipDownload_Click(object sender, RoutedEventArgs e)
-        {
-            Main.Content = pageClipDownload;
-        }
+        //private void btnClipDownload_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Main.Content = pageClipDownload;
+        //}
 
-        private void btnChatDownload_Click(object sender, RoutedEventArgs e)
-        {
-            Main.Content = pageChatDownload;
-        }
+        //private void btnChatDownload_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Main.Content = pageChatDownload;
+        //}
 
-        private void btnChatUpdate_Click(object sender, RoutedEventArgs e)
-        {
-            Main.Content = pageChatUpdate;
-        }
+        //private void btnChatUpdate_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Main.Content = pageChatUpdate;
+        //}
 
-        private void btnChatRender_Click(object sender, RoutedEventArgs e)
-        {
-            Main.Content = pageChatRender;
-        }
+        //private void btnChatRender_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Main.Content = pageChatRender;
+        //}
 
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {

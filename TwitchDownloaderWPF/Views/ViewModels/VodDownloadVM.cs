@@ -619,5 +619,19 @@ namespace TwitchDownloaderWPF.Views.ViewModels
 
             return true;
         }
+        
+        public void OnLoaded()
+        {
+            //Action to preload some data
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                // 
+            }
+        }
     }
 }

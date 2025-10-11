@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderWPF.Properties;
+using TwitchDownloaderWPF.Views.ViewModels;
 
 namespace TwitchDownloaderWPF
 {
@@ -67,6 +68,10 @@ namespace TwitchDownloaderWPF
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            if (DataContext is VodDownloadVM vm)
+            {
+                vm.OnLoaded();
+            }
         }
 
 
