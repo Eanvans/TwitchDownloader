@@ -24,6 +24,7 @@ using TwitchDownloaderWPF.Enums;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
+using TwitchDownloaderWPF.TwitchTasks;
 using TwitchDownloaderWPF.Utils;
 
 namespace TwitchDownloaderWPF.Views.ViewModels
@@ -270,10 +271,10 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             catch (Exception ex)
             {
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                MessageBox.Show(Application.Current.MainWindow!, Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show(System.Windows.Application.Current.MainWindow!, Translations.Strings.UnableToGetVideoInfo, Translations.Strings.UnableToGetInfo, MessageBoxButton.OK, MessageBoxImage.Error);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(),
+                    System.Windows.MessageBox.Show(System.Windows.Application.Current.MainWindow!, ex.ToString(),
                         Translations.Strings.VerboseErrorOutput,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -455,7 +456,8 @@ namespace TwitchDownloaderWPF.Views.ViewModels
                 AppendLog(Translations.Strings.ErrorLog + ex.Message);
                 if (Settings.Default.VerboseErrors)
                 {
-                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    System.Windows.MessageBox.Show(System.Windows.Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
 
@@ -471,7 +473,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         /// TODO 考虑取消默认的前后3min的自动切片
         /// </summary>
         /// <param name="param"></param>
-        private async void DownloadClip(object param)
+        private void DownloadClip(object param)
         {
             VodCommentData d = param as VodCommentData;
             TimeSpan st = TimeSpan.FromSeconds(d.OffsetSeconds - 60 * 3);
@@ -497,37 +499,26 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             VideoDownloadOptions options = GetOptions(saveFileDialog.FileName, null, st, et, true, true);
             options.CacheCleanerCallback = HandleCacheCleanerCallback;
 
-            var downloadProgress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
-            VideoDownloader currentDownload = new VideoDownloader(options, downloadProgress);
             _cancellationTokenSource = new CancellationTokenSource();
 
             SetImage("Images/ppOverheat.gif", true);
             StatusMessage = Translations.Strings.StatusDownloading;
-            //UpdateActionButtons(true);
-            try
+
+            VodDownloadTask downloadTask = new VodDownloadTask
             {
-                await currentDownload.DownloadAsync(_cancellationTokenSource.Token);
-                downloadProgress.SetStatus(Translations.Strings.StatusDone);
-                SetImage("Images/ppHop.gif", true);
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellationTokenSource.IsCancellationRequested)
-            {
-                downloadProgress.SetStatus(Translations.Strings.StatusCanceled);
-                SetImage("Images/ppHop.gif", true);
-            }
-            catch (Exception ex)
-            {
-                downloadProgress.SetStatus(Translations.Strings.StatusError);
-                SetImage("Images/peepoSad.png", false);
-                AppendLog(Translations.Strings.ErrorLog + ex.Message);
-                if (Settings.Default.VerboseErrors)
+                DownloadOptions = options,
+                Info =
                 {
-                    MessageBox.Show(Application.Current.MainWindow!, ex.ToString(), Translations.Strings.VerboseErrorOutput, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Title = saveFileDialog.FileName,
                 }
+            };
+
+            lock (PageQueue.taskLock)
+            {
+                PageQueue.taskList.Add(downloadTask);
             }
 
             _idle = true;
-            downloadProgress.ReportProgress(0);
             _cancellationTokenSource.Dispose();
             GC.Collect();
         }
@@ -541,7 +532,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             {
                 var queueOptions = new WindowQueueOptions(PageEnum.VOD_DOWNLOAD)
                 {
-                    Owner = Application.Current.MainWindow,
+                    Owner = System.Windows.Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
                 queueOptions.ShowDialog();
@@ -619,8 +610,10 @@ namespace TwitchDownloaderWPF.Views.ViewModels
 
             return true;
         }
-        
-        public void OnLoaded()
+
+        private static string LUMI_VOD_URL = "https://www.twitch.tv/kanekolumi/videos?filter=archives&sort=time";
+
+        public async void OnLoaded()
         {
             //Action to preload some data
             try

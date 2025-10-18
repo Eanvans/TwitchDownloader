@@ -15,6 +15,7 @@
         SourceInitialized="Window_OnSourceInitialized">
     <Grid Background="{DynamicResource AppBackground}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="55" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -23,7 +24,28 @@
             <ColumnDefinition Width="5"/>
         </Grid.ColumnDefinitions>
 
-        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0"
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal">
+            <Button x:Name="btnVodDownload" Margin="4" Width="122" Height="52" 
+               Click="btnVodDownload_Click" FontWeight="Bold" Padding="3,0,3,0" 
+               Background="{DynamicResource BigButtonBackground}" 
+               Foreground="{DynamicResource BigButtonText}" BorderBrush="{DynamicResource BigButtonBorder}" >
+                <TextBlock Text="{lex:Loc VodDownload}" TextWrapping="Wrap" TextAlignment="Center" 
+                    MaxWidth="{Binding ActualWidth, ElementName=btnVodDownload, Mode=OneWay}" Padding="3,0,3,0" />
+            </Button>
+
+            <Button x:Name="btnQueue" Margin="4" Width="122" Height="52" 
+              Click="btnQueue_Click" FontWeight="Bold" Padding="3,0,3,0" 
+              Background="{DynamicResource BigButtonBackground}" 
+              Foreground="{DynamicResource BigButtonText}" 
+              BorderBrush="{DynamicResource BigButtonBorder}" >
+                <TextBlock Text="{lex:Loc TaskQueue}" TextWrapping="Wrap" TextAlignment="Center" 
+                    MaxWidth="{Binding ActualWidth, ElementName=btnQueue, Mode=OneWay}" Padding="3,0,3,0" />
+            </Button>
+
+        </StackPanel>
+        
+      
+        <Frame Focusable="False" x:Name="Main" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1"
                NavigationUIVisibility="Hidden" Background="{DynamicResource AppBackground}" 
                BorderBrush="{DynamicResource AppBackground}"/>
     </Grid>

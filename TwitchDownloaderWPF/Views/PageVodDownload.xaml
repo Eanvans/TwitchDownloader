@@ -31,17 +31,9 @@
     </Page.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-            <Label Content="All Recent VODs:" HorizontalAlignment="Left"/>
-            <ItemsControl Width="210">
-                
-            </ItemsControl>
-        </StackPanel>
-        
         <Grid Grid.Column="1" Background="{DynamicResource AppBackground}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20"/>
