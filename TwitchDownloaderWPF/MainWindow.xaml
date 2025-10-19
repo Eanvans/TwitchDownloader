@@ -9,8 +9,7 @@
         lex:ResxLocalizationProvider.DefaultAssembly="TwitchDownloaderWPF"
         lex:ResxLocalizationProvider.DefaultDictionary="Strings"
         mc:Ignorable="d"
-        Title="KanekoLumi Twitch Downloader" MinHeight="440" Height="560"
-        WindowState="Maximized"
+        Title="KanekoLumi Twitch Downloader" MinHeight="440" Height="680"
         MinWidth="700" Width="800" Loaded="Window_Loaded" 
         SourceInitialized="Window_OnSourceInitialized">
     <Grid Background="{DynamicResource AppBackground}">
