@@ -11,9 +11,9 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
+using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Services;
-using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderWPF.Models;
@@ -306,8 +306,19 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
+            BtnClearLog.Dispatcher.BeginInvoke(() =>
+                BtnClearLog.IsEnabled = true
+            );
             textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
+            );
+        }
+
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            BtnClearLog.IsEnabled = false;
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
             );
         }
 

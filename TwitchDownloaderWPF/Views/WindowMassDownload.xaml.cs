@@ -22,7 +22,10 @@ namespace TwitchDownloaderWPF
     /// </summary>
     public partial class WindowMassDownload : Window
     {
-        private readonly string _clearChannelsConstant = Guid.NewGuid().ToString();
+        private readonly ComboBoxItem _comboBoxItemClearChannels = new()
+        {
+            Content = Translations.Strings.ClearRecentChannels
+        };
 
         public DownloadType downloaderType { get; set; }
         public ObservableCollection<TaskData> videoList { get; set; } = new ObservableCollection<TaskData>();
@@ -76,11 +79,11 @@ namespace TwitchDownloaderWPF
             if (!textTrimmed.Equals(currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
             {
                 currentChannel = null;
-                if (!string.IsNullOrEmpty(textTrimmed))
+                if (!string.IsNullOrEmpty(textTrimmed) && !textTrimmed.Any(char.IsWhiteSpace))
                 {
                     try
                     {
-                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed });
+                        var idRes = await TwitchHelper.GetUserIds(new[] { textTrimmed.ToLowerInvariant() });
                         var infoRes = await TwitchHelper.GetUserInfo(idRes.data.users.Select(x => x.id));
                         currentChannel = infoRes.data.users[0];
                     }
@@ -438,10 +441,11 @@ namespace TwitchDownloaderWPF
             if (string.Equals(comboBoxItem.Content as string, currentChannel?.login, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            if (comboBoxItem.Tag as string == _clearChannelsConstant)
+            if (ReferenceEquals(comboBoxItem, _comboBoxItemClearChannels))
             {
                 Settings.Default.RecentChannels.Clear();
                 currentChannel = null;
+                ComboChannel.Text = "";
                 UpdateRecentChannels();
             }
 
@@ -464,19 +468,18 @@ namespace TwitchDownloaderWPF
                 recentChannels.RemoveAt(recentChannels.Count - 1);
             }
 
+            var oldText = ComboChannel.Text;
+
             ComboChannel.Items.Clear();
             foreach (var channel in recentChannels)
             {
                 ComboChannel.Items.Add(new ComboBoxItem { Content = channel });
             }
 
-            // Select the most recent channel, if there is one
-            if (recentChannels.Count > 0)
-            {
-                ComboChannel.SelectedIndex = 0;
-            }
+            // Restore the previous text
+            ComboChannel.Text = oldText;
 
-            ComboChannel.Items.Add(new ComboBoxItem { Content = Translations.Strings.ClearRecentChannels, Tag = _clearChannelsConstant });
+            ComboChannel.Items.Add(_comboBoxItemClearChannels);
 
             Settings.Default.RecentChannels = recentChannels;
             Settings.Default.Save();

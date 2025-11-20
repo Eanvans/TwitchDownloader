@@ -246,10 +246,10 @@ File the program will output to.
 (Default: `12`) Font size.
 
 **--message-fontstyle**
-(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, and **italic**.
+(Default: `normal`) Font style of message. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--username-fontstyle**
-(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, and **italic**.
+(Default: `bold`) Font style of username. Valid values are **normal**, **bold**, **italic**, and **bolditalic**.
 
 **--timestamp**
 (Default: `false`) Enables timestamps to the left of messages, similar to VOD chat on Twitch.
@@ -292,6 +292,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **--readable-colors**
 (Default: `true`) Increases the contrast of usernames against the background or outline color.
 
+**--avatars**
+(Default: `false`) Renders the avatars of users next to their username and badges
+
 **--offline**
 (Default: `false`) Render completely offline using only embedded emotes, badges, and bits from the input json.
 
@@ -315,6 +318,9 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 
 **--scale-emoji**
 (Default: `1.0`) Number to scale emoji images.
+
+**--scale-avatar**
+(Default: `1.0`) Number to scale avatar images.
 
 **--scale-vertical**
 (Default: `1.0`) Number to scale vertical padding.
@@ -488,7 +494,7 @@ Default true boolean flags must be assigned: `--default-true-flag=false`. Defaul
 Enum flag arguments may be assigned without spaces `--flag Value1,Value2,Value3` or with spaces when wrapped in quotes `--flag "Value1, Value2, Value3"` (see [String arguments](#string-arguments)).
 
 ### Time durations
-Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `hh:mm`, `dd.hh:mm:ss.ms`).
+Time duration arguments may be formatted in milliseconds `###ms`, seconds `###s`, minutes `###m`, hours `###h`, or [time](https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0) (i.e. `hh:mm:ss`, `mm:ss`, `dd.hh:mm:ss.ms`).
 If the time duration is given as a number without a unit, seconds will be assumed. Decimals are supported.
 
 "Beginning" arguments set when trimming begins. For example, `--beginning 17s` will make the output start 17 seconds after the source begins.

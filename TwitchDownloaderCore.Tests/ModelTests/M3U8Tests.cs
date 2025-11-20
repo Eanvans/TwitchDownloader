@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Text;
-using TwitchDownloaderCore.Tools;
+using TwitchDownloaderCore.Models;
 
-namespace TwitchDownloaderCore.Tests.ToolTests
+namespace TwitchDownloaderCore.Tests.ModelTests
 {
     // ReSharper disable StringLiteralTypo
     public class M3U8Tests
@@ -243,6 +243,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string EXAMPLE_M3U8_TWITCH =
                 "#EXTM3U" +
+                "\n#EXT-X-SESSION-DATA:DATA-ID=\"com.amazon.ivs.unavailable-media\",VALUE=\"W3siTkFNRSI6IjE0NDBwNjAiLCJCQU5EV0lEVEgiOjc3MzY1NjAsIkNPREVDUyI6ImhldjEuMS4yLkwxNTAuOTAuMC4wLjAuMC4wLG1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIyNTYweDE0NDAiLCJGSUxURVJfUkVBU09OUyI6W10sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6WyJBVVRIWl9OT1RfTE9HR0VEX0lOIl0sIkdST1VQLUlEIjoiY2h1bmtlZCIsIkZSQU1FLVJBVEUiOjYwfSx7Ik5BTUUiOiJBdWRpbyBPbmx5IiwiQkFORFdJRFRIIjoyMDQzMTAsIkNPREVDUyI6Im1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIiLCJGSUxURVJfUkVBU09OUyI6WyJGUl9BVURJT19ESVNBTExPV0VEIl0sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6W10sIkdST1VQLUlEIjoiYXVkaW9fb25seSIsIkZSQU1FLVJBVEUiOjB9XQ==\"" +
                 "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
                 "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995" +
@@ -301,6 +302,11 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             }
 
             CultureInfo.CurrentCulture = oldCulture;
+
+            Assert.Equal(
+                "W3siTkFNRSI6IjE0NDBwNjAiLCJCQU5EV0lEVEgiOjc3MzY1NjAsIkNPREVDUyI6ImhldjEuMS4yLkwxNTAuOTAuMC4wLjAuMC4wLG1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIyNTYweDE0NDAiLCJGSUxURVJfUkVBU09OUyI6W10sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6WyJBVVRIWl9OT1RfTE9HR0VEX0lOIl0sIkdST1VQLUlEIjoiY2h1bmtlZCIsIkZSQU1FLVJBVEUiOjYwfSx7Ik5BTUUiOiJBdWRpbyBPbmx5IiwiQkFORFdJRFRIIjoyMDQzMTAsIkNPREVDUyI6Im1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIiLCJGSUxURVJfUkVBU09OUyI6WyJGUl9BVURJT19ESVNBTExPV0VEIl0sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6W10sIkdST1VQLUlEIjoiYXVkaW9fb25seSIsIkZSQU1FLVJBVEUiOjB9XQ==",
+                m3u8.FileMetadata.SessionData["com.amazon.ivs.unavailable-media"]
+            );
 
             Assert.Equal(streams.Length, m3u8.Streams.Length);
             Assert.Equivalent(streams[0], m3u8.Streams[0], true);
@@ -599,6 +605,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         {
             const string EXAMPLE_M3U8 =
                 "#EXTM3U" +
+                "\n#EXT-X-SESSION-DATA:DATA-ID=\"com.amazon.ivs.unavailable-media\",VALUE=\"W3siTkFNRSI6IjE0NDBwNjAiLCJCQU5EV0lEVEgiOjc3MzY1NjAsIkNPREVDUyI6ImhldjEuMS4yLkwxNTAuOTAuMC4wLjAuMC4wLG1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIyNTYweDE0NDAiLCJGSUxURVJfUkVBU09OUyI6W10sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6WyJBVVRIWl9OT1RfTE9HR0VEX0lOIl0sIkdST1VQLUlEIjoiY2h1bmtlZCIsIkZSQU1FLVJBVEUiOjYwfSx7Ik5BTUUiOiJBdWRpbyBPbmx5IiwiQkFORFdJRFRIIjoyMDQzMTAsIkNPREVDUyI6Im1wNGEuNDAuMiIsIlJFU09MVVRJT04iOiIiLCJGSUxURVJfUkVBU09OUyI6WyJGUl9BVURJT19ESVNBTExPV0VEIl0sIkFVVEhPUklaQVRJT05fUkVBU09OUyI6W10sIkdST1VQLUlEIjoiYXVkaW9fb25seSIsIkZSQU1FLVJBVEUiOjB9XQ==\"" +
                 "\n#EXT-X-TWITCH-INFO:ORIGIN=\"s3\",B=\"false\",REGION=\"NA\",USER-IP=\"255.255.255.255\",SERVING-ID=\"123abc456def789ghi012jkl345mno67\",CLUSTER=\"cloudfront_vod\",USER-COUNTRY=\"US\",MANIFEST-CLUSTER=\"cloudfront_vod\"" +
                 "\n#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO" +
                 "\n#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"chunked\",FRAME-RATE=59.995" +

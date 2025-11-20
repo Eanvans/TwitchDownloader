@@ -13,10 +13,6 @@
 
 **Este arquivo Readme pode estar desatualizado, considere lê-lo em [**inglês**](README.md)**
 
-## Exemplo do Chat Renderizado
-
-<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
-
 ## O quê ele pode fazer?
 
 - Baixar VODs da Twitch
@@ -25,13 +21,17 @@
 - Atualizar os conteúdos de um arquivo do chat em JSON gerado préviamente com uma opção para salvar em outro formato
 - Usar um arquivo do chat em JSON gerado préviamente para renderizar o chat com o Twitter Twemoji ou Google Noto Color emojis e emotes BTTV, FFZ, 7TV estáticos e animados
 
+### Exemplo do Chat Renderizado
+
+<https://user-images.githubusercontent.com/1060681/197653099-c3fd12c2-f03a-4580-84e4-63ce3f36be8d.mp4>
+
 # GUI
 
 ## Windows WPF
 
 ![](https://i.imgur.com/bLegxGX.gif)
 
-### [Veja a documentação completa do WPF aqui](TwitchDownloaderWPF/README.md)
+### [Veja a documentação completa do WPF aqui](TwitchDownloaderWPF/README_pt-br.md)
 
 ### Funcionalidade
 
@@ -43,11 +43,11 @@ O GUI do Windows WPF implementa todas as principais funcionalidades do programa 
 
 ### Suporte à Múltiplas línguas
 
-O GUI do Windows WPF está disponível em múltiplas linguagens graças à traduções da comunidade. Veja a [Sessão de localização](TwitchDownloaderWPF/README.md#localization) do [WPF README](TwitchDownloaderWPF/README.md) para mais detalhes.
+O GUI do Windows WPF está disponível em múltiplas linguagens graças à traduções da comunidade. Veja a [Sessão de localização](TwitchDownloaderWPF/README_pt-br.md#localização) do [WPF README](TwitchDownloaderWPF/README_pt-br.md) para mais detalhes.
 
 ### Tema
 
-O GUI do Windows WPF vêm com tanto o tema claro como o escuro, junto de uma opção para atualizar automaticamente de acordo com o tema do Windows. Ele também suporta temas criados pelo usuário! Veja a [Sessão de Tema](TwitchDownloaderWPF/README.md#theming) dos [WPF README](TwitchDownloaderWPF/README.md) para mais detalhes.
+O GUI do Windows WPF vêm com tanto o tema claro como o escuro, junto de uma opção para atualizar automaticamente de acordo com o tema do Windows. Ele também suporta temas criados pelo usuário! Veja a [Sessão de Tema](TwitchDownloaderWPF/README_pt-br.md#temas) dos [WPF README](TwitchDownloaderWPF/README_pt-br.md) para mais detalhes.
 
 ### Demonstração em Vídeo
 
@@ -66,11 +66,11 @@ Nenhum GUI disponível pro MacOS até o momento :(
 
 ### [Veja a documentação completa do CLI aqui](TwitchDownloaderCLI/README.md)
 
-O CLI é cross-platform e implementa as principais funcionalidades do programa. Funciona no  Windows, Linux, e MacOS<sup>*</sup>.
+O CLI é multi-plataforma e implementa as principais funcionalidades do programa. Funciona no  Windows, Linux, e MacOS<sup>*</sup>.
 
 <sup>*Somente Macs com Intel foram testadas</sup>
 
-Com o CLI, é possível automatizar processamento de vídeo processing com scripts externos. Por exemplo, você poderia copiar e colar o código a seguir num arquivo `.bat` no Windows para baixar um VOD e seu chat, e depois renderizar o chat, tudo de um único valor.
+Com o CLI, é possível automatizar processamento de vídeo com scripts externos. Por exemplo, você poderia copiar e colar o código a seguir num arquivo `.bat` no Windows para baixar um VOD e seu chat, e depois renderizar o chat, tudo de um único valor.
 
 ```bat
 @echo off
@@ -90,7 +90,7 @@ TwitchDownloaderCLI.exe chatrender -i %vodid%_chat.json -h 1080 -w 422 --framera
 cd C:\folder\containing\TwitchDownloaderCLI
 ```
 
-4. Se você não tem o FFmpeg, você pode instalar-lo via o [gerenciador de pacotes Chocolatey](https://community.chocolatey.org/), todavia também podes obter-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
+4. Se você não tem o FFmpeg, você pode instalar ele via o [gerenciador de pacotes Chocolatey](https://community.chocolatey.org/), ou pode obtê-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
 
 ```
 TwitchDownloaderCLI.exe ffmpeg --download
@@ -122,13 +122,13 @@ cd directory/containing/TwitchDownloaderCLI
 sudo chmod +x TwitchDownloaderCLI
 ```
 
-7. a) Se você não tem o FFmpeg, você deve instalar-lo no sistema todo pelo gerenciador de pacotes da sua distro, todavia também podes obter-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
+7. a) Se você não tem o FFmpeg, você deve instalar ele no sistema todo pelo gerenciador de pacotes da sua distro, ou pode obtê-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
 
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
 
-7. b) Se baixado como um arquivo separado, também deve dar-lo direitos de execução com:
+7. b) Se baixado como um arquivo separado, também deve lhe dar direitos de execução com:
 
 ```
 sudo chmod +x ffmpeg
@@ -164,13 +164,13 @@ cd directory/containing/TwitchDownloaderCLI
 chmod +x TwitchDownloaderCLI
 ```
 
-6. a) Se você não tem o FFmpeg, você deve instalar-lo no sistema todo pelo [gerenciador de pacotes Homebrew](https://brew.sh/), todavia também podes obter-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
+6. a) Se você não tem o FFmpeg, você deve instalar ele no sistema todo pelo [gerenciador de pacotes Homebrew](https://brew.sh/), ou pode obtê-lo como um arquivo separado no [ffmpeg.org](https://ffmpeg.org/download.html) ou usando o TwitchDownloaderCLI:
 
 ```
 ./TwitchDownloaderCLI ffmpeg --download
 ```
 
-6. b) Se baixado como um arquivo separado, também deve dar-lo direitos de execução com:
+6. b) Se baixado como um arquivo separado, também deve lhe dar direitos de execução com:
 
 ```
 chmod +x ffmpeg

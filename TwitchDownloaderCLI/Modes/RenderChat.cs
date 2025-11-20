@@ -54,14 +54,16 @@ namespace TwitchDownloaderCLI.Modes
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotSupportedException("Invalid message font style. Valid values are: normal, bold, and italic")
+                    "bolditalic" or "bolditalics" => SKFontStyle.BoldItalic,
+                    _ => throw new NotSupportedException("Invalid message font style. Valid values are: normal, bold, italic, and bolditalic.")
                 },
                 UsernameFontStyle = inputOptions.UsernameFontStyle.ToLower() switch
                 {
                     "normal" => SKFontStyle.Normal,
                     "bold" => SKFontStyle.Bold,
                     "italic" or "italics" => SKFontStyle.Italic,
-                    _ => throw new NotSupportedException("Invalid username font style. Valid values are: normal, bold, and italic")
+                    "bolditalic" or "bolditalics" => SKFontStyle.BoldItalic,
+                    _ => throw new NotSupportedException("Invalid username font style. Valid values are: normal, bold, italic, and bolditalic.")
                 },
                 UpdateRate = inputOptions.UpdateRate,
                 Framerate = inputOptions.Framerate,
@@ -72,6 +74,7 @@ namespace TwitchDownloaderCLI.Modes
                 TempFolder = inputOptions.TempFolder,
                 SubMessages = (bool)inputOptions.SubMessages!,
                 ChatBadges = (bool)inputOptions.ChatBadges!,
+                RenderUserAvatars = inputOptions.RenderUserAvatars,
                 Timestamp = inputOptions.Timestamp,
                 Offline = inputOptions.Offline,
                 EmojiVendor = inputOptions.EmojiVendor.ToLower() switch
@@ -85,6 +88,7 @@ namespace TwitchDownloaderCLI.Modes
                 EmoteScale = inputOptions.ScaleEmote,
                 BadgeScale = inputOptions.ScaleBadge,
                 EmojiScale = inputOptions.ScaleEmoji,
+                AvatarScale = inputOptions.ScaleAvatar,
                 VerticalSpacingScale = inputOptions.ScaleVertical,
                 SidePaddingScale = inputOptions.ScaleLeft,
                 SectionHeightScale = inputOptions.ScaleSectionHeight,

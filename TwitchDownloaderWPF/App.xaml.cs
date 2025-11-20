@@ -20,6 +20,8 @@ namespace TwitchDownloaderWPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            UpgradeSettings();
+
             base.OnStartup(e);
 
             ConfigureServiceCollection();
@@ -62,18 +64,42 @@ namespace TwitchDownloaderWPF
 
         private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            var ex = e.Exception;
-            MessageBox.Show(ex.ToString(), Translations.Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+            if (Settings.Default.UpgradeRequired)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.UpgradeRequired = false;
+                Settings.Default.Save();
+            }
+        }
 
-            Current?.Shutdown();
+        private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+            ShowRecoverableExceptionMessage(e.Exception);
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = (Exception)e.ExceptionObject;
-            MessageBox.Show(ex.ToString(), Translations.Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
 
-            Current?.Shutdown();
+            if (e.IsTerminating)
+            {
+                MessageBox.Show(ex.ToString(), Translations.Strings.FatalError, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            ShowRecoverableExceptionMessage(ex);
+        }
+
+        private static void ShowRecoverableExceptionMessage(Exception exception)
+        {
+            var message = exception + Environment.NewLine + Environment.NewLine + Environment.NewLine + string.Format(Translations.Strings.FatalErrorMessage, nameof(TwitchDownloaderWPF));
+            var result = MessageBox.Show(message, Translations.Strings.FatalError, MessageBoxButton.YesNo, MessageBoxImage.Error);
+
+            if (result is MessageBoxResult.No)
+            {
+                Current?.Shutdown();
+            }
         }
 
         public static void RequestAppThemeChange(bool forceRepaint = false)

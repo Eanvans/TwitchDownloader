@@ -124,7 +124,7 @@
     <value>Adicionar à Fila</value>
   </data>
   <data name="AlphaNotSupportedByCodec" xml:space="preserve">
-    <value>Você selecionou um canal Alfa (transparência) para um container/codec que não o suporta. Remova transparêmcia ou codifique com MOV + RLE/PRORES ou WEBM + VP8/VP9</value>
+    <value>Você selecionou um canal Alfa (transparência) para um container/codec que não o suporta. Remova transparência ou codifique com MOV + RLE/PRORES ou WEBM + VP8/VP9</value>
   </data>
   <data name="ApplicationTheme" xml:space="preserve">
     <value>Tema </value>
@@ -331,7 +331,7 @@
     <value>Por favor coloque um Link/ID de vídeo válido\nExamples:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
-    <value>Aqrquivo JSON:</value>
+    <value>Arquivo JSON:</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>Comprimento:</value>
@@ -469,11 +469,11 @@
     <value>Fila de Trabalhos</value>
   </data>
   <data name="ThirdPartyEmotes" xml:space="preserve">
-    <value>Emotes de terceiros</value>
+    <value>Emotes de terceiros </value>
     <comment>Deixe um espaço no final</comment>
   </data>
   <data name="ThirdPartyEmotesTooltip" xml:space="preserve">
-    <value>Também embuta emotes third party no arquivo. O tamanho do arquivo será muito mais largo.</value>
+    <value>Também embuta emotes de terceiros no arquivo. O tamanho do arquivo será muito mais largo.</value>
   </data>
   <data name="TimestampFormat" xml:space="preserve">
     <value>Formato de Tempo:</value>
@@ -542,10 +542,10 @@
     <value>Lista de URL</value>
   </data>
   <data name="VerboseErrorOutput" xml:space="preserve">
-    <value>Saída de Erros com Ladainha</value>
+    <value>Saída de Erros Detalhados</value>
   </data>
   <data name="VerboseErrors" xml:space="preserve">
-    <value>Erros com Ladainha:</value>
+    <value>Erros Detalhados:</value>
   </data>
   <data name="VideoCreatedAt" xml:space="preserve">
     <value>Criado:</value>
@@ -566,7 +566,7 @@
     <value>Vídeo está expirado ou o ID embutido está corrompido</value>
   </data>
   <data name="VodLinkId" xml:space="preserve">
-    <value>Link/ID da VOD:</value>
+    <value>Link/ID do VOD:</value>
   </data>
   <data name="TemplateVods" xml:space="preserve">
     <value>VODs:</value>
@@ -1023,24 +1023,36 @@
     <value>A duração (incluindo o corte) do vídeo/clipe/chat em um formato personalizável.</value>
   </data>
   <data name="VideoTypeAllVideos" xml:space="preserve">
-    <value>All Videos</value>
+    <value>Todos os Vídeos</value>
   </data>
   <data name="VideoTypePastBroadcasts" xml:space="preserve">
-    <value>Broadcasts</value>
+    <value>Transmissões</value>
   </data>
   <data name="VideoTypeHighlights" xml:space="preserve">
-    <value>Highlights</value>
+    <value>Destaques</value>
   </data>
   <data name="VideoTypeUploads" xml:space="preserve">
     <value>Uploads</value>
   </data>
   <data name="DelayDownload" xml:space="preserve">
-    <value>Delay Download Until Broadcast Finished</value>
+    <value>Atrase o Download até o Fim da Transmissão</value>
   </data>
   <data name="ReduceMotion" xml:space="preserve">
-    <value>Reduce Motion:</value>
+    <value>Reduzir Movimento:</value>
   </data>
   <data name="ClearRecentChannels" xml:space="preserve">
-    <value>Clear Recent Channels</value>
+    <value>Limpar Canais Recentes</value>
+  </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>Limpar Log</value>
+  </data>
+  <data name="RenderUserAvatars" xml:space="preserve">
+    <value>Avatares de usuário:</value>
+  </data>
+  <data name="AvatarScale" xml:space="preserve">
+    <value>Escala do Avatar:</value>
+  </data>
+  <data name="FatalErrorMessage" xml:space="preserve">
+    <value>{0} pode continuar, porém pode ser instável. Deseja continuar?</value><comment>{0} is the name of the application.</comment>
   </data>
 </root>

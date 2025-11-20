@@ -116,6 +116,7 @@ namespace TwitchDownloaderWPF
                 EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture),
                 BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture),
                 EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture),
+                AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture),
                 SidePaddingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture),
                 SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture),
                 WordSpacingScale = double.Parse(textWordSpaceScale.Text, CultureInfo.CurrentCulture),
@@ -139,6 +140,7 @@ namespace TwitchDownloaderWPF
                 SubMessages = checkSub.IsChecked.GetValueOrDefault(),
                 ChatBadges = checkBadge.IsChecked.GetValueOrDefault(),
                 Offline = checkOffline.IsChecked.GetValueOrDefault(),
+                RenderUserAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault(),
                 AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault(),
                 AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault(),
@@ -182,6 +184,7 @@ namespace TwitchDownloaderWPF
                 textEmoteScale.Text = Settings.Default.EmoteScale.ToString("0.0#");
                 textEmojiScale.Text = Settings.Default.EmojiScale.ToString("0.0#");
                 textBadgeScale.Text = Settings.Default.BadgeScale.ToString("0.0#");
+                textAvatarScale.Text = Settings.Default.AvatarScale.ToString("0.0#");
                 textVerticalScale.Text = Settings.Default.VerticalSpacingScale.ToString("0.0#");
                 textSidePaddingScale.Text = Settings.Default.LeftSpacingScale.ToString("0.0#");
                 textSectionHeightScale.Text = Settings.Default.SectionHeightScale.ToString("0.0#");
@@ -193,6 +196,7 @@ namespace TwitchDownloaderWPF
                 textIgnoreUsersList.Text = Settings.Default.IgnoreUsersList;
                 textBannedWordsList.Text = Settings.Default.BannedWordsList;
                 checkOffline.IsChecked = Settings.Default.Offline;
+                checkRenderAvatars.IsChecked = Settings.Default.RenderUserAvatars;
                 checkDispersion.IsChecked = Settings.Default.DisperseCommentOffsets;
                 checkAlternateMessageBackgrounds.IsChecked = Settings.Default.AlternateMessageBackgrounds;
                 checkAdjustUsernameVisibility.IsChecked = Settings.Default.AdjustUsernameVisibility;
@@ -200,16 +204,7 @@ namespace TwitchDownloaderWPF
                 RadioEmojiTwemoji.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.TwitterTwemoji;
                 RadioEmojiNone.IsChecked = (EmojiVendor)Settings.Default.RenderEmojiVendor == EmojiVendor.None;
 
-                comboBadges.Items.Clear();
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskBroadcaster, Tag = ChatBadgeType.Broadcaster });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskModerator, Tag = ChatBadgeType.Moderator });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskVIP, Tag = ChatBadgeType.VIP });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskSubscriber, Tag = ChatBadgeType.Subscriber });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskPredictions, Tag = ChatBadgeType.Predictions });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskNoAudioNoVideo, Tag = ChatBadgeType.NoAudioVisual });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskTwitchPrime, Tag = ChatBadgeType.PrimeGaming });
-                comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskOthers, Tag = ChatBadgeType.Other });
-
+                comboBadges.SelectedItems.Clear();
                 var badgeMask = (ChatBadgeType)Settings.Default.ChatBadgeMask;
                 foreach (CheckComboBoxItem item in comboBadges.Items)
                 {
@@ -224,6 +219,8 @@ namespace TwitchDownloaderWPF
                     if (container.Name == Settings.Default.VideoContainer)
                     {
                         comboFormat.SelectedItem = container;
+
+                        comboCodec.Items.Clear();
                         foreach (Codec codec in container.SupportedCodecs)
                         {
                             comboCodec.Items.Add(codec);
@@ -232,12 +229,10 @@ namespace TwitchDownloaderWPF
                                 comboCodec.SelectedItem = codec;
                             }
                         }
+
                         break;
                     }
                 }
-
-                comboFormat.SelectionChanged += ComboFormatOnSelectionChanged;
-                comboCodec.SelectionChanged += ComboCodecOnSelectionChanged;
 
                 LoadFfmpegArgs();
             }
@@ -250,7 +245,7 @@ namespace TwitchDownloaderWPF
             e.Handled = true;
         }
 
-        private void ComboCodecOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboCodec_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (comboCodec.SelectedItem != null)
             {
@@ -258,7 +253,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private void ComboFormatOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboFormat_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             VideoContainer currentContainer = (VideoContainer)comboFormat.SelectedItem;
             comboCodec.Items.Clear();
@@ -267,7 +262,7 @@ namespace TwitchDownloaderWPF
                 comboCodec.Items.Add(codec);
                 if (Settings.Default.VideoCodec == codec.Name)
                 {
-                    comboCodec.SelectedItem = Settings.Default.VideoCodec;
+                    comboCodec.SelectedItem = codec;
                 }
             }
 
@@ -301,6 +296,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.SubMessages = checkSub.IsChecked.GetValueOrDefault();
             Settings.Default.ChatBadges = checkBadge.IsChecked.GetValueOrDefault();
             Settings.Default.Offline = checkOffline.IsChecked.GetValueOrDefault();
+            Settings.Default.RenderUserAvatars = checkRenderAvatars.IsChecked.GetValueOrDefault();
             Settings.Default.DisperseCommentOffsets = checkDispersion.IsChecked.GetValueOrDefault();
             Settings.Default.AlternateMessageBackgrounds = checkAlternateMessageBackgrounds.IsChecked.GetValueOrDefault();
             Settings.Default.AdjustUsernameVisibility = checkAdjustUsernameVisibility.IsChecked.GetValueOrDefault();
@@ -339,6 +335,7 @@ namespace TwitchDownloaderWPF
                 Settings.Default.EmoteScale = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.EmojiScale = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.BadgeScale = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
+                Settings.Default.AvatarScale = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.VerticalSpacingScale = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.LeftSpacingScale = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 Settings.Default.SectionHeightScale = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
@@ -377,6 +374,7 @@ namespace TwitchDownloaderWPF
                 _ = double.Parse(textEmoteScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textBadgeScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textEmojiScale.Text, CultureInfo.CurrentCulture);
+                _ = double.Parse(textAvatarScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textVerticalScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSidePaddingScale.Text, CultureInfo.CurrentCulture);
                 _ = double.Parse(textSectionHeightScale.Text, CultureInfo.CurrentCulture);
@@ -433,8 +431,19 @@ namespace TwitchDownloaderWPF
 
         private void AppendLog(string message)
         {
+            BtnClearLog.Dispatcher.BeginInvoke(() =>
+                BtnClearLog.IsEnabled = true
+            );
             textLog.Dispatcher.BeginInvoke(() =>
                 textLog.AppendText(message + Environment.NewLine)
+            );
+        }
+
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            BtnClearLog.IsEnabled = false;
+            textLog.Dispatcher.BeginInvoke(() =>
+                textLog.Document.Blocks.Clear()
             );
         }
 
@@ -457,11 +466,7 @@ namespace TwitchDownloaderWPF
 
         private void Page_Initialized(object sender, EventArgs e)
         {
-            List<string> fonts = new List<string>();
-            foreach (var fontFamily in fontManager.FontFamilies)
-            {
-                fonts.Add(fontFamily);
-            }
+            var fonts = fontManager.FontFamilies.ToList();
             fonts.Add("Inter Embedded");
             fonts.Sort();
             foreach (var font in fonts)
@@ -488,6 +493,15 @@ namespace TwitchDownloaderWPF
             comboFormat.Items.Add(movContainer);
             comboFormat.Items.Add(webmContainer);
             comboFormat.Items.Add(mkvContainer);
+
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskBroadcaster, Tag = ChatBadgeType.Broadcaster });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskModerator, Tag = ChatBadgeType.Moderator });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskVIP, Tag = ChatBadgeType.VIP });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskSubscriber, Tag = ChatBadgeType.Subscriber });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskPredictions, Tag = ChatBadgeType.Predictions });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskNoAudioNoVideo, Tag = ChatBadgeType.NoAudioVisual });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskTwitchPrime, Tag = ChatBadgeType.PrimeGaming });
+            comboBadges.Items.Add(new CheckComboBoxItem { Content = Translations.Strings.BadgeMaskOthers, Tag = ChatBadgeType.Other });
 
             LoadSettings();
         }
@@ -517,6 +531,7 @@ namespace TwitchDownloaderWPF
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            LoadSettings();
             btnDonate.Visibility = Settings.Default.HideDonation ? Visibility.Collapsed : Visibility.Visible;
             statusImage.Visibility = Settings.Default.ReduceMotion ? Visibility.Collapsed : Visibility.Visible;
         }

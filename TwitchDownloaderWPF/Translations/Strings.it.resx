@@ -1045,4 +1045,16 @@
   <data name="ClearRecentChannels" xml:space="preserve">
     <value>Clear Recent Channels</value>
   </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>Clear Log</value>
+  </data>
+  <data name="RenderUserAvatars" xml:space="preserve">
+    <value>User Avatars:</value>
+  </data>
+  <data name="AvatarScale" xml:space="preserve">
+    <value>Avatar Scale:</value>
+  </data>
+  <data name="FatalErrorMessage" xml:space="preserve">
+    <value>{0} can resume but may be unstable. Do you want to resume?</value><comment>{0} is the name of the application.</comment>
+  </data>
 </root>

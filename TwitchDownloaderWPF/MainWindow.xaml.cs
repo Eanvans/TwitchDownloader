@@ -8,7 +8,9 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Navigation;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderWPF.Properties;
 using TwitchDownloaderWPF.Services;
@@ -32,7 +34,6 @@ namespace TwitchDownloaderWPF
         public MainWindow()
         {
             InitializeComponent();
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
         private void btnVodDownload_Click(object sender, RoutedEventArgs e)
@@ -73,12 +74,6 @@ namespace TwitchDownloaderWPF
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Main.Content = pageVodDownload;
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
-            }
 
             // Replace old crop parameters with new trim parameters
             Settings.Default.TemplateVod = Regex.Replace(Settings.Default.TemplateVod, "{crop_(?=(?:start|end)(?:_|}))", "{trim_");
@@ -192,6 +187,47 @@ namespace TwitchDownloaderWPF
                         string.Format(Translations.Strings.StatusDownloaderFFmpeg, percent.ToString())
                     );
                 }
+            }
+        }
+
+        private void Main_OnNavigated(object sender, NavigationEventArgs e)
+        {
+            UpdateSelectedBigButton();
+        }
+
+        private void UpdateSelectedBigButton()
+        {
+            ((TextBlock)btnVodDownload.Content).TextDecorations = null;
+            ((TextBlock)btnClipDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatDownload.Content).TextDecorations = null;
+            ((TextBlock)btnChatUpdate.Content).TextDecorations = null;
+            ((TextBlock)btnChatRender.Content).TextDecorations = null;
+            ((TextBlock)btnQueue.Content).TextDecorations = null;
+
+            var newPage = Main.Content;
+            if (ReferenceEquals(newPage, pageVodDownload))
+            {
+                ((TextBlock)btnVodDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageClipDownload))
+            {
+                ((TextBlock)btnClipDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatDownload))
+            {
+                ((TextBlock)btnChatDownload.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatUpdate))
+            {
+                ((TextBlock)btnChatUpdate.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageChatRender))
+            {
+                ((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
+            }
+            else if (ReferenceEquals(newPage, pageQueue))
+            {
+                ((TextBlock)btnQueue.Content).TextDecorations = TextDecorations.Underline;
             }
         }
     }

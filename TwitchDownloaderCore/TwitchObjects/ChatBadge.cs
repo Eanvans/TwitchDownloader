@@ -25,6 +25,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public string title { get; set; }
         public string description { get; set; }
         public byte[] bytes { get; set; }
+        [JsonIgnore]
+        public SKCodec Codec { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string url { get; set; }
     }
@@ -46,15 +48,23 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             foreach (var (versionName, versionData) in versions)
             {
-                using MemoryStream ms = new MemoryStream(versionData.bytes);
+                SKBitmap badgeImage;
+                if (versionData.Codec is null)
+                {
+                    // For some reason, twitch has corrupted images sometimes :) for example
+                    // https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
+                    using var ms = new MemoryStream(versionData.bytes);
+                    using var codec = SKCodec.Create(ms, out var result);
+                    if (codec is null)
+                        throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
 
-                //For some reason, twitch has corrupted images sometimes :) for example
-                //https://static-cdn.jtvnw.net/badges/v1/a9811799-dce3-475f-8feb-3745ad12b7ea/1
-                using var codec = SKCodec.Create(ms, out var result);
-                if (codec is null)
-                    throw new Exception($"Skia was unable to decode badge {versionName} ({name}). Returned: {result}");
+                    badgeImage = SKBitmap.Decode(codec);
+                }
+                else
+                {
+                    badgeImage = SKBitmap.Decode(versionData.Codec);
+                }
 
-                var badgeImage = SKBitmap.Decode(codec);
                 badgeImage.SetImmutable();
                 Versions.Add(versionName, badgeImage);
             }
@@ -72,12 +82,40 @@ namespace TwitchDownloaderCore.TwitchObjects
             };
         }
 
-        public void Resize(double newScale)
+        /// <inheritdoc cref="TwitchEmote.SnapResize(int,int,int)"/>
+        public void SnapResize(int height, int upSnapThreshold, int downSnapThreshold)
         {
             foreach (var (versionName, bitmap) in Versions)
             {
-                SKImageInfo imageInfo = new SKImageInfo((int)(bitmap.Width * newScale), (int)(bitmap.Height * newScale));
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
+                var bitmapInfo = bitmap.Info;
+
+                var badgeHeight = TwitchHelper.SnapResizeHeight(height, upSnapThreshold, downSnapThreshold, bitmapInfo.Height);
+
+                var imageInfo = new SKImageInfo((int)(badgeHeight / (double)bitmap.Height * bitmap.Width), badgeHeight);
+                var newBitmap = new SKBitmap(imageInfo);
+                bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
+                bitmap.Dispose();
+                newBitmap.SetImmutable();
+                Versions[versionName] = newBitmap;
+            }
+        }
+
+        public void Scale(double newScale) => SnapScale(newScale, 0, 0);
+
+        public void SnapScale(double newScale, int upSnapThreshold, int downSnapThreshold)
+        {
+            if (Math.Abs(newScale - 1) < 0.01)
+            {
+                return;
+            }
+
+            foreach (var (versionName, bitmap) in Versions)
+            {
+                var bitmapInfo = bitmap.Info;
+                var height = TwitchHelper.SnapResizeHeight((int)(bitmapInfo.Height * newScale), upSnapThreshold, downSnapThreshold, bitmapInfo.Height);
+
+                var imageInfo = new SKImageInfo((int)(height / (double)bitmapInfo.Height * bitmapInfo.Width), height);
+                var newBitmap = new SKBitmap(imageInfo);
                 bitmap.ScalePixels(newBitmap, SKFilterQuality.High);
                 bitmap.Dispose();
                 newBitmap.SetImmutable();
@@ -106,6 +144,11 @@ namespace TwitchDownloaderCore.TwitchObjects
                     foreach (var (_, bitmap) in Versions)
                     {
                         bitmap?.Dispose();
+                    }
+
+                    foreach (var (_, badgeData) in VersionsData)
+                    {
+                        badgeData.Codec?.Dispose();
                     }
                 }
             }
