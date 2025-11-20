@@ -20,7 +20,7 @@ namespace TwitchDownloaderWPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            UpgradeSettings();
+            //UpgradeSettings();
 
             base.OnStartup(e);
 
@@ -62,15 +62,15 @@ namespace TwitchDownloaderWPF
             db.Database.EnsureCreated();
         }
 
-        private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            if (Settings.Default.UpgradeRequired)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.UpgradeRequired = false;
-                Settings.Default.Save();
-            }
-        }
+        //private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        //{
+        //    if (Settings.Default.UpgradeRequired)
+        //    {
+        //        Settings.Default.Upgrade();
+        //        Settings.Default.UpgradeRequired = false;
+        //        Settings.Default.Save();
+        //    }
+        //}
 
         private static void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {

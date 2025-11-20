@@ -198,10 +198,10 @@ namespace TwitchDownloaderWPF
         private void UpdateSelectedBigButton()
         {
             ((TextBlock)btnVodDownload.Content).TextDecorations = null;
-            ((TextBlock)btnClipDownload.Content).TextDecorations = null;
-            ((TextBlock)btnChatDownload.Content).TextDecorations = null;
-            ((TextBlock)btnChatUpdate.Content).TextDecorations = null;
-            ((TextBlock)btnChatRender.Content).TextDecorations = null;
+            //((TextBlock)btnClipDownload.Content).TextDecorations = null;
+            //((TextBlock)btnChatDownload.Content).TextDecorations = null;
+            //((TextBlock)btnChatUpdate.Content).TextDecorations = null;
+            //((TextBlock)btnChatRender.Content).TextDecorations = null;
             ((TextBlock)btnQueue.Content).TextDecorations = null;
 
             var newPage = Main.Content;
@@ -211,19 +211,19 @@ namespace TwitchDownloaderWPF
             }
             else if (ReferenceEquals(newPage, pageClipDownload))
             {
-                ((TextBlock)btnClipDownload.Content).TextDecorations = TextDecorations.Underline;
+               // ((TextBlock)btnClipDownload.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatDownload))
             {
-                ((TextBlock)btnChatDownload.Content).TextDecorations = TextDecorations.Underline;
+               // ((TextBlock)btnChatDownload.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatUpdate))
             {
-                ((TextBlock)btnChatUpdate.Content).TextDecorations = TextDecorations.Underline;
+               // ((TextBlock)btnChatUpdate.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageChatRender))
             {
-                ((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
+                //((TextBlock)btnChatRender.Content).TextDecorations = TextDecorations.Underline;
             }
             else if (ReferenceEquals(newPage, pageQueue))
             {

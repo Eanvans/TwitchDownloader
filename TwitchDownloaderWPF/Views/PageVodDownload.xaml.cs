@@ -99,7 +99,7 @@ namespace TwitchDownloaderWPF
         {
             if (IsInitialized)
             {
-                Settings.Default.VodTrimMode = (int)VideoTrimMode.Safe;
+                //Settings.Default.VodTrimMode = (int)VideoTrimMode.Safe;
                 Settings.Default.Save();
             }
         }
@@ -108,7 +108,7 @@ namespace TwitchDownloaderWPF
         {
             if (IsInitialized)
             {
-                Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
+                //Settings.Default.VodTrimMode = (int)VideoTrimMode.Exact;
                 Settings.Default.Save();
             }
         }
