@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// 完整文件（仅在原文件基础上添加/修改了 RecentVodLinks 相关内容及 GetVideoInfoClick 调用）
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveCharts;
 using LiveCharts.Wpf;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Text.Json;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Models;
@@ -66,14 +68,35 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         public string streamerId;
         private CancellationTokenSource _cancellationTokenSource;
 
+        // --- 新增：最近 VOD 链接相关字段 ---
+        private readonly object _recentLock = new();
+        private const int RECENT_MAX_ITEMS = 50;
+        private List<RecentEntry> _recentEntries = new();
+        private ObservableCollection<string> _recentVodLinks = new();
+        private string RecentFilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TwitchDownloader", "recent_vods.json");
+
+        // 最近项的序列化结构（包含时间，便于将来扩展）
+        private class RecentEntry
+        {
+            public string Url { get; set; }
+            public DateTime Time { get; set; }
+        }
+        // ------------------------------------------------
+
         public VodDownloadVM()
         {
         }
 
         public ICommand OnGetVideoInfo => new RelayCommand(GetVideoInfoClick, () => _idle);
+        public ICommand OnClearVideoInfo => new RelayCommand(() => {
+            LinkUrl = string.Empty;
+        });
         public ICommand OnDownLoad => new RelayCommand(DownloadClick);
         public ICommand OnEnqueueDownload => new RelayCommand(EnququeDownload);
         public ICommand OnDownloadClip => new RelayCommand<object>(DownloadClip);
+
+        // 添加到 VodDownloadVM 类中（与其它 ICommand 定义放在一起）
+        public ICommand OpenRecentCommand => new RelayCommand<object>(OpenRecent);
 
         [ObservableProperty]
         public SeriesCollection seriesCollection;
@@ -114,6 +137,9 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         protected TimeSpan StartTime => new TimeSpan((int)NumStartHour, (int)NumStartMinute, (int)NumStartSecond);
         protected TimeSpan EndTime => new TimeSpan((int)NumEndHour, (int)NumEndMinute, (int)NumEndSecond);
         public bool IsExactTrimMode { get => _isExactTrimMode; set => SetProperty(ref _isExactTrimMode, value); }
+
+        // 新增：用于绑定到 UI 左侧列表
+        public ObservableCollection<string> RecentVodLinks { get => _recentVodLinks; private set => SetProperty(ref _recentVodLinks, value); }
 
         public Func<double, string> YFormatter => value => value.ToString("C");
 
@@ -249,16 +275,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
 
                 // set the maximum
                 //if (vodLength > TimeSpan.Zero)
-                //{
-                //    NumStartHour.Maximum = (int)vodLength.TotalHours;
-                //    numEndHour.Maximum = (int)vodLength.TotalHours;
-                //}
-                //else
-                //{
-                //    numStartHour.Maximum = 48;
-                //    numEndHour.Maximum = 48;
-                //}
-
+                //...
                 NumEndHour = (int)VodLength.TotalHours;
                 NumEndMinute = VodLength.Minutes;
                 NumEndSecond = VodLength.Seconds;
@@ -387,9 +404,21 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             ComboQualityIndex = selectedIndex;
         }
 
+        // 修改：在点击 Get Info 时先持久化到最近列表（去重、倒序）
         private async void GetVideoInfoClick()
         {
             _idle = false;
+
+            // 添加/保存最近链接（不重复，最新置顶）
+            try
+            {
+                AddRecentLink(LinkUrl?.Trim());
+            }
+            catch
+            {
+                // 忽略持久化错误，不阻断主流程
+            }
+
             await GetVideoInfo();
             await AnalyzeCommentsInfo();
             _idle = true;
@@ -398,10 +427,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
         private async void DownloadClick()
         {
             //if (((HandyControl.Controls.SplitButton)sender).IsDropDownOpen)
-            //{
-            //    return;
-            //}
-
+            //...
             if (!ValidateInputs())
             {
                 AppendLog(Translations.Strings.ErrorLog + Translations.Strings.InvalidTrimInputs);
@@ -467,6 +493,15 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             //UpdateActionButtons(false);
 
             GC.Collect();
+        }
+
+
+        private void OpenRecent(object param)
+        {
+            if (param is string link && !string.IsNullOrWhiteSpace(link))
+            {
+                LinkUrl = link.Trim();
+            }
         }
 
         /// <summary>
@@ -550,14 +585,7 @@ namespace TwitchDownloaderWPF.Views.ViewModels
             image.UriSource = new Uri(imageUri, UriKind.Relative);
             image.EndInit();
             //if (isGif)
-            //{
-            //    ImageBehavior.SetAnimatedSource(statusImage, image);
-            //}
-            //else
-            //{
-            //    ImageBehavior.SetAnimatedSource(statusImage, null);
-            //    statusImage.Source = image;
-            //}
+            //...
         }
 
         private DirectoryInfo[] HandleCacheCleanerCallback(DirectoryInfo[] directories)
@@ -613,18 +641,130 @@ namespace TwitchDownloaderWPF.Views.ViewModels
 
         private static string LUMI_VOD_URL = "https://www.twitch.tv/kanekolumi/videos?filter=archives&sort=time";
 
+        // OnLoaded：加载最近记录
         public async void OnLoaded()
         {
-            //Action to preload some data
             try
             {
-
+                await LoadRecentLinksAsync();
             }
-            catch (Exception)
+            catch
             {
-
-                // 
+                // 忽略加载错误
             }
+        }
+
+        // 新增：加载最近链接（从文件）
+        private async Task LoadRecentLinksAsync()
+        {
+            try
+            {
+                lock (_recentLock)
+                {
+                    _recentEntries.Clear();
+                    RecentVodLinks.Clear();
+                }
+
+                if (!File.Exists(RecentFilePath))
+                {
+                    return;
+                }
+
+                string json = await File.ReadAllTextAsync(RecentFilePath);
+                var list = JsonSerializer.Deserialize<List<RecentEntry>>(json);
+                if (list == null) return;
+
+                // 按时间倒序显示（最新在前）
+                var ordered = list.OrderByDescending(x => x.Time).ToList();
+                lock (_recentLock)
+                {
+                    _recentEntries = ordered;
+                    RecentVodLinks.Clear();
+                    foreach (var e in _recentEntries)
+                    {
+                        RecentVodLinks.Add(e.Url);
+                    }
+                }
+            }
+            catch
+            {
+                // 忽略加载过程中的异常
+            }
+        }
+
+        // 新增：保存最近链接至文件
+        private async Task SaveRecentLinksAsync()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(RecentFilePath);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                List<RecentEntry> copyList;
+                lock (_recentLock)
+                {
+                    copyList = _recentEntries.ToList();
+                }
+
+                var json = JsonSerializer.Serialize(copyList);
+                await File.WriteAllTextAsync(RecentFilePath, json);
+            }
+            catch
+            {
+                // 忽略保存异常（不影响主流程）
+            }
+        }
+
+        // 新增：添加最近链接（去重、最新置顶、限制数量），同步更新 ObservableCollection 并持久化
+        public void AddRecentLink(string link)
+        {
+            if (string.IsNullOrWhiteSpace(link)) return;
+
+            link = link.Trim();
+
+            lock (_recentLock)
+            {
+                // 去重（忽略大小写）
+                var existing = _recentEntries.FirstOrDefault(x => string.Equals(x.Url, link, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    // 更新时间并移到最前
+                    existing.Time = DateTime.UtcNow;
+                    _recentEntries.Remove(existing);
+                    _recentEntries.Insert(0, existing);
+
+                    // 更新 ObservableCollection：移除旧项并插入到头部
+                    var existingIndex = RecentVodLinks.IndexOf(existing.Url);
+                    if (existingIndex >= 0)
+                    {
+                        RecentVodLinks.RemoveAt(existingIndex);
+                    }
+                    RecentVodLinks.Insert(0, existing.Url);
+                }
+                else
+                {
+                    var entry = new RecentEntry { Url = link, Time = DateTime.UtcNow };
+                    _recentEntries.Insert(0, entry);
+                    RecentVodLinks.Insert(0, link);
+                }
+
+                // 保持最多 RECENT_MAX_ITEMS 条
+                if (_recentEntries.Count > RECENT_MAX_ITEMS)
+                {
+                    var remove = _recentEntries.Skip(RECENT_MAX_ITEMS).ToList();
+                    foreach (var r in remove) _recentEntries.Remove(r);
+                }
+                while (RecentVodLinks.Count > RECENT_MAX_ITEMS)
+                {
+                    RecentVodLinks.RemoveAt(RecentVodLinks.Count - 1);
+                }
+            }
+
+            // 异步保存（不等待）
+            _ = SaveRecentLinksAsync();
         }
     }
 }

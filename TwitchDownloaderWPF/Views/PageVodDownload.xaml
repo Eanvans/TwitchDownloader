@@ -31,8 +31,40 @@
     </Page.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" HorizontalAlignment="Left">
+            <Label Content="All Recent VODs:" HorizontalAlignment="Left"/>
+            <!-- 整列可横向滚动：外层 ScrollViewer 控制水平滚动 -->
+            <ScrollViewer Width="210"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  MinHeight="480"
+                  Background="{DynamicResource AppElementBackground}">
+                <ItemsControl ItemsSource="{Binding RecentVodLinks}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- 每行使用 TextBlock（不换行），超出时由外层 ScrollViewer 提供水平滚动 -->
+                            <TextBlock Text="{Binding}"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="NoWrap"
+                               Margin="2"                               
+                               Foreground="{DynamicResource AppText}"
+                               ToolTip="{Binding}">
+                                <TextBlock.InputBindings>
+                                    <!-- 双击时调用 ViewModel 的 OpenRecentCommand，传入当前 URL -->
+                                    <MouseBinding Gesture="LeftDoubleClick"
+                                          Command="{Binding DataContext.OpenRecentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                          CommandParameter="{Binding}" />
+                                </TextBlock.InputBindings>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
 
         <Grid Grid.Column="1" Background="{DynamicResource AppBackground}">
             <Grid.ColumnDefinitions>
@@ -72,11 +104,17 @@
             <!-- MIDDLE -->
             <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
-                <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" 
-              Text="{Binding LinkUrl}"
-              Background="{DynamicResource AppElementBackground}" 
-              BorderBrush="{DynamicResource AppElementBorder}" 
-              Foreground="{DynamicResource AppText}" />
+                <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" 
+                         KeyDown="TextUrl_OnKeyDown" 
+                         Text="{Binding LinkUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Background="{DynamicResource AppElementBackground}" 
+                         BorderBrush="{DynamicResource AppElementBorder}" 
+                         Foreground="{DynamicResource AppText}" />
+                <Button x:Name="btnClear" Margin="3" MinWidth="50" Content="Clear"                    
+                         Background="{DynamicResource ActionButtonBackground}" 
+                         Foreground="{DynamicResource ActionButtonText}" 
+                         BorderBrush="{DynamicResource ActionButtonBorder}"
+                         Command="{Binding OnClearVideoInfo}"/>
                 <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}"                    
              Background="{DynamicResource ActionButtonBackground}" 
              Foreground="{DynamicResource ActionButtonText}" 
